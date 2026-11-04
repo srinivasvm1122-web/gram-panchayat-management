@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Check if request is from an authenticated user
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if the user has an authorized administrative role
+    function isOfficer() {
+      return isAuthenticated() && (
+        request.auth.token.role in ['SuperAdmin', 'PDO', 'President', 'Officer'] ||
+        exists(/databases/$(database)/documents/Admins/$(request.auth.uid))
+      );
+    }
+
+    // Check if user is Super Administrator (CEO / Zilla Panchayat)
+    function isSuperAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'SuperAdmin' ||
+        get(/databases/$(database)/documents/Admins/$(request.auth.uid)).data.role == 'SuperAdmin'
+      );
+    }
+
+    // Admins Collection: Only Super Admin can create, modify or delete Officer accounts
+    // Public registration is strictly denied!
+    match /Admins/{adminId} {
+      allow read: if isOfficer();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // Villages Collection: Public has READ-ONLY access. Only Officers can Add, Edit, Delete.
+    match /Villages/{villageId} {
+      allow read: if true; // Public view of official demographic information
+      allow create, update, delete: if isOfficer();
+    }
+
+    // VillageStatistics: Public read-only; Officer write
+    match /VillageStatistics/{statId} {
+      allow read: if true;
+      allow write: if isOfficer();
+    }
+
+    // RationCardSummary (APL / BPL): Public read-only; Officer write
+    match /RationCardSummary/{summaryId} {
+      allow read: if true;
+      allow write: if isOfficer();
+    }
+
+    // ElectionStatistics: Public read-only; Officer write
+    // STRICT PRIVACY RULE: No individual secret votes or ballot selections can ever be stored!
+    match /ElectionStatistics/{electionId} {
+      allow read: if true;
+      allow write: if isOfficer() && 
+        !request.resource.data.keys().hasAny(['individualVotes', 'ballotChoices', 'voterSelections']);
+    }
+
+    // Funds Collection: Public read-only for government transparency; Officer write
+    match /Funds/{fundId} {
+      allow read: if true;
+      allow write: if isOfficer();
+    }
+
+    // Transactions / Vouchers: Public read-only; Officer write
+    match /Transactions/{transactionId} {
+      allow read: if true;
+      allow write: if isOfficer();
+    }
+
+    // Individual Village Members: STRICT PRIVACY, HEALTH & STATUTORY CASTE CATEGORY RULE
+    // Personal identifiable records, contact numbers, health checkup status, and statutory caste category
+    // are strictly confidential and restricted to authorized Gram Panchayat Officers only! Never public!
+    match /Members/{memberId} {
+      allow read, write: if isOfficer();
+    }
+
+    // AuditLogs: Immutable audit trail
+    match /AuditLogs/{logId} {
+      allow read: if isOfficer();
+      allow create: if isAuthenticated() || isOfficer();
+      allow update, delete: if false; // Strict immutability
+    }
+  }
+}

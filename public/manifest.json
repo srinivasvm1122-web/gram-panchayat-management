@@ -1,0 +1,17 @@
+{
+  "short_name": "GramPanchayat",
+  "name": "Gram Panchayat Digital Management System | ಗ್ರಾಮ ಪಂಚಾಯತ್ ವ್ಯವಸ್ಥೆ",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0a3871",
+  "theme_color": "#0a3871",
+  "display": "standalone",
+  "orientation": "portrait-primary"
+}

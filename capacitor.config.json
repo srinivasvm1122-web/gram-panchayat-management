@@ -1,0 +1,13 @@
+{
+  "appId": "gov.karnataka.grampanchayat",
+  "appName": "Gram Panchayat Digital Management",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#0a3871",
+    "allowMixedContent": true
+  }
+}

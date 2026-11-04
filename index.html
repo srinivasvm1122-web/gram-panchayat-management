@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#0a3871" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="description" content="Karnataka Gram Panchayat Digital Management Portal - Official Demographics, Rations, Elections and Funds Management" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Google Fonts: Inter & Noto Sans Kannada -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Kannada:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN for instant styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              gov: {
+                50: '#f0f7ff',
+                100: '#e0effe',
+                200: '#bae0fd',
+                300: '#7cc5fb',
+                400: '#36a5f7',
+                500: '#0c87eb',
+                600: '#026bc9',
+                700: '#0355a2',
+                800: '#074885',
+                900: '#0a3871',
+                950: '#062349',
+              },
+              ashoka: {
+                gold: '#d4af37',
+                navy: '#00205b',
+                saffron: '#ff9933',
+                green: '#138808'
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'Noto Sans Kannada', 'sans-serif'],
+              kannada: ['Noto Sans Kannada', 'Inter', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+
+    <title>ಗ್ರಾಮ ಪಂಚಾಯತ್ | Gram Panchayat Digital Management System</title>
+  </head>
+  <body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen selection:bg-gov-200 selection:text-gov-900">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

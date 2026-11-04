@@ -1,0 +1,56 @@
+/* Custom government dashboard typography, printing and scrollbar styles */
+
+/* Global body styling */
+body {
+  margin: 0;
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family: 'Inter', 'Noto Sans Kannada', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Safe area padding for mobile Android navigation bars */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 14px);
+}
+
+/* Hide scrollbar for tab navigation container */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Print styling for official government documents */
+@media print {
+  header, nav, .no-print, button {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}
