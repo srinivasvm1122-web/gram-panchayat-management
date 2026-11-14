@@ -514,10 +514,13 @@ app.post("/api/auth/login", async (req, res) => {
     }
 
     const authorizedEmail = (process.env.OFFICER_EMAIL || "kartikhmkartikhm3@gmail.com").trim().toLowerCase();
+    const authorizedPrefix = authorizedEmail.split("@")[0];
     const authorizedPassword = String(process.env.OFFICER_PASSWORD || "Kartik@143");
 
-    // Check credentials against securely configured officer credentials
-    const isCredentialsValid = (inputIdentifier === authorizedEmail && inputPassword === authorizedPassword);
+    // Check credentials against securely configured officer credentials (supports full email or username prefix)
+    const isIdentifierValid = (inputIdentifier === authorizedEmail || inputIdentifier === authorizedPrefix);
+    const isPasswordValid = (inputPassword === authorizedPassword || inputPassword.trim() === authorizedPassword);
+    const isCredentialsValid = (isIdentifierValid && isPasswordValid);
 
     if (isCredentialsValid) {
       const officerData = {
