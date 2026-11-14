@@ -11,8 +11,10 @@ import {
   Download,
   Users,
   Lock,
-  ArrowRight
+  ArrowRight,
+  Globe
 } from "lucide-react";
+import { LanguageSelector } from "./LanguageSelector";
 
 export const Header = ({ 
   lang, 
@@ -54,7 +56,17 @@ export const Header = ({
             <div>
               <div className="flex items-center space-x-2">
                 <span className="text-[10px] sm:text-xs uppercase tracking-wider font-semibold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
-                  {lang === "kn" ? "ಕರ್ನಾಟಕ ಸರ್ಕಾರ" : "Govt. of Karnataka"}
+                  {lang === "kn" 
+                    ? "ಕರ್ನಾಟಕ ಸರ್ಕಾರ" 
+                    : lang === "hi" 
+                    ? "कर्नाटक सरकार" 
+                    : lang === "mr" 
+                    ? "कर्नाटक शासन" 
+                    : lang === "ta" 
+                    ? "கர்நாடக அரசு" 
+                    : lang === "te" 
+                    ? "కర్ణాటక ప్రభుత్వం" 
+                    : "Govt. of Karnataka"}
                 </span>
                 <span className="text-[11px] text-slate-300 hidden md:inline">
                   RDPR Department
@@ -72,29 +84,12 @@ export const Header = ({
           {/* Right Action Controls */}
           <div className="hidden lg:flex items-center space-x-3">
             
-            {/* Language Toggle Button */}
-            <div className="bg-gov-950/70 p-1 rounded-xl border border-slate-700/60 flex items-center shadow-inner">
-              <button
-                onClick={() => setLang("en")}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all ${
-                  lang === "en" 
-                    ? "bg-amber-500 text-gov-950 shadow-sm" 
-                    : "text-slate-300 hover:text-white"
-                }`}
-              >
-                English
-              </button>
-              <button
-                onClick={() => setLang("kn")}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all ${
-                  lang === "kn" 
-                    ? "bg-amber-500 text-gov-950 shadow-sm font-kannada" 
-                    : "text-slate-300 hover:text-white"
-                }`}
-              >
-                ಕನ್ನಡ
-              </button>
-            </div>
+            {/* Multilingual 6-Language Selector Dropdown */}
+            <LanguageSelector 
+              currentLang={lang} 
+              onSelectLanguage={setLang} 
+              variant="dropdown" 
+            />
 
             {/* Quick Master PDF Export */}
             <button
@@ -161,12 +156,11 @@ export const Header = ({
 
           {/* Mobile Right Controls */}
           <div className="flex items-center space-x-2 lg:hidden">
-            <button
-              onClick={() => setLang(lang === "en" ? "kn" : "en")}
-              className="px-2 py-1 bg-amber-500 text-gov-950 font-bold text-xs rounded border border-amber-300"
-            >
-              {lang === "en" ? "ಕನ್ನಡ" : "EN"}
-            </button>
+            <LanguageSelector 
+              currentLang={lang} 
+              onSelectLanguage={setLang} 
+              variant="dropdown" 
+            />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg bg-gov-800 text-slate-200 hover:text-white border border-slate-700"

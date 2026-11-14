@@ -20,8 +20,10 @@ import {
   MapPin,
   ShieldCheck,
   ChevronRight,
-  Edit3
+  Edit3,
+  Globe
 } from "lucide-react";
+import { LanguageSelector } from "./LanguageSelector";
 
 export const Dashboard = ({ 
   stats, 
@@ -32,6 +34,7 @@ export const Dashboard = ({
   electionData,
   t, 
   lang,
+  setLang,
   isOfficer = false,
   onNavigateToLogin,
   setActiveTab,
@@ -291,6 +294,34 @@ export const Dashboard = ({
         </div>
       )}
 
+      {/* Multilingual 6-Language Selection Quick Switcher Card */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3.5">
+          <div className="flex items-center space-x-2.5">
+            <div className="p-2 bg-gov-900 text-amber-400 rounded-xl shadow-sm">
+              <Globe className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-slate-900 flex items-center space-x-2">
+                <span>{t.languageSetting || "Language Selection"}</span>
+                <span className="text-[10px] bg-amber-100 text-gov-900 font-extrabold px-2 py-0.5 rounded-full border border-amber-300">
+                  6 Languages
+                </span>
+              </h3>
+              <p className="text-xs text-slate-500">
+                {t.chooseLanguagePrompt || "Choose your preferred language across web portal and Android app."}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <LanguageSelector 
+          currentLang={lang} 
+          onSelectLanguage={setLang} 
+          variant="grid" 
+        />
+      </div>
+
       {/* Primary KPI Grid (Requirement 2 - 11 Metrics) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
         {cards.map((card) => {
@@ -333,10 +364,10 @@ export const Dashboard = ({
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-slate-900 text-sm flex items-center space-x-2">
                 <Users className="w-4 h-4 text-gov-800" />
-                <span>{lang === "kn" ? "ಜನಸಂಖ್ಯಾ ಹಂಚಿಕೆ" : "Demographic Ratio"}</span>
+                <span>{t.populationTitle || "Demographic Ratio"}</span>
               </h3>
               <span className="text-xs font-semibold text-slate-500">
-                {stats.totalPopulation} {lang === "kn" ? "ಒಟ್ಟು" : "Total"}
+                {stats.totalPopulation} {t.totalPopulation || "Total"}
               </span>
             </div>
 
@@ -406,7 +437,7 @@ export const Dashboard = ({
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-slate-900 text-sm flex items-center space-x-2">
                 <Vote className="w-4 h-4 text-purple-700" />
-                <span>{lang === "kn" ? "ಮತದಾನದ ಅಂಕಿಅಂಶ" : "Election Statistics"}</span>
+                <span>{t.electionTitle || "Election Statistics"}</span>
               </h3>
               <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs">
                 {stats.votingPercentage}% Turnout
@@ -456,7 +487,7 @@ export const Dashboard = ({
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-slate-900 text-sm flex items-center space-x-2">
                 <IndianRupee className="w-4 h-4 text-emerald-700" />
-                <span>{lang === "kn" ? "ನಿಧಿ ಮತ್ತು ವೆಚ್ಚಗಳ ಲೆಕ್ಕಪತ್ರ" : "Treasury Balance"}</span>
+                <span>{t.fundsTitle || "Treasury Balance"}</span>
               </h3>
               <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold text-xs">
                 Audited

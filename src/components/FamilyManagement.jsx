@@ -120,7 +120,14 @@ export const FamilyManagement = ({
               <span>Section 4: Household & Housing Schemes Registry</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
-              {lang === "kn" ? "ಕುಟುಂಬ ಮತ್ತು ವಸತಿ ಯೋಜನೆಗಳ ನಿರ್ವಹಣೆ" : "Family & Housing Schemes Management"}
+              {({
+                kn: "ಕುಟುಂಬ ಮತ್ತು ವಸತಿ ಯೋಜನೆಗಳ ನಿರ್ವಹಣೆ",
+                hi: "परिवार एवं आवास योजना प्रबंधन",
+                mr: "कुटुंब व गृहनिर्माण योजना व्यवस्थापन",
+                ta: "குடும்பம் மற்றும் வீட்டு வசதித் திட்டங்கள் மேலாண்மை",
+                te: "కుటుంబం మరియు గృహనిర్మాణ పథకాల నిర్వహణ",
+                en: "Family & Housing Schemes Management"
+              })[lang] || "Family & Housing Schemes Management"}
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
               Ward-wise household registry, PMAY / Basava Vasathi housing schemes, and basic utility connections.

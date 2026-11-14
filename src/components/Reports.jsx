@@ -139,7 +139,7 @@ export const Reports = ({
                 </div>
 
                 <h3 className="text-base sm:text-lg font-black text-slate-900 mt-3.5">
-                  {lang === "kn" ? rep.titleKn : rep.title}
+                  {rep.title}
                 </h3>
                 <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                   {rep.desc}

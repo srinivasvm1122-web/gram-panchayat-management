@@ -103,12 +103,10 @@ export const RationCardSummary = ({
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/50">
           <h3 className="font-extrabold text-slate-900 text-base">
-            {lang === "kn" ? "ಗ್ರಾಮವಾರು ಪಡಿತರ ಚೀಟಿ ಫಲಾನುಭವಿಗಳ ರಿಜಿಸ್ಟರ್" : "Village-wise Ration Card Beneficiaries Register"}
+            {t.rationTitle || "Village-wise Ration Card Beneficiaries Register"}
           </h3>
           <p className="text-xs text-slate-500">
-            {lang === "kn" 
-              ? "ಪ್ರತಿಯೊಂದು ಗ್ರಾಮದ ಎ.ಪಿ.ಎಲ್ ಮತ್ತು ಬಿ.ಪಿ.ಎಲ್ ಕಾರ್ಡ್‌ಗಳು ಹಾಗೂ ನ್ಯಾಯಬೆಲೆ ಅಂಗಡಿ ವಿತರಕರ ವಿವರ."
-              : "Detailed breakdown of APL and BPL quota entitlements and local Fair Price Shops."}
+            {t.rationSubtitle || "Detailed breakdown of APL and BPL quota entitlements and local Fair Price Shops."}
           </p>
         </div>
 

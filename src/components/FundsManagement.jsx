@@ -225,7 +225,7 @@ export const FundsManagement = ({
       <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <h3 className="font-extrabold text-slate-900 text-base flex items-center space-x-2">
           <Layers className="w-5 h-5 text-gov-800" />
-          <span>{lang === "kn" ? "ವೆಚ್ಚದ ವರ್ಗವಾರು ವಿವರಣೆ" : "Audited Expense Categories Breakdown"}</span>
+          <span>{t.developmentFunds || "Audited Expense Categories Breakdown"}</span>
         </h3>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
@@ -302,9 +302,7 @@ export const FundsManagement = ({
               <span>{t.allTransactions}</span>
             </h3>
             <p className="text-xs text-slate-500">
-              {lang === "kn" 
-                ? "ಪಂಚಾಯತ್ ಅಭಿವೃದ್ಧಿ ಅಧಿಕಾರಿ (PDO) ಮತ್ತು ಅಧ್ಯಕ್ಷರು ಅನುಮೋದಿಸಿದ ಅಧಿಕೃತ ವೋಚರ್‌ಗಳು."
-                : "Audited financial vouchers with verified approval authorities and receipt attachments."}
+              {t.fundsSubtitle || "Audited financial vouchers with verified approval authorities and receipt attachments."}
             </p>
           </div>
 
@@ -425,9 +423,7 @@ export const FundsManagement = ({
                   <span>{t.addTransaction}</span>
                 </h3>
                 <p className="text-xs text-sky-200">
-                  {lang === "kn" 
-                    ? "ಅಧಿಕೃತ ಪಂಚಾಯತಿ ಖರ್ಚು ಅಥವಾ ಅನುದಾನದ ವೋಚರ್ ದಾಖಲಿಸಿ."
-                    : "Create audited expenditure voucher with approval authority."}
+                  {t.fundsSubtitle || "Create audited expenditure voucher with approval authority."}
                 </p>
               </div>
               <button 

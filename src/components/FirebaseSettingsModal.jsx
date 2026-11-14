@@ -13,7 +13,8 @@ import {
   Layers,
   ArrowRight,
   Key,
-  HardDrive
+  HardDrive,
+  Globe
 } from "lucide-react";
 import { 
   getActiveFirebaseConfig, 
@@ -22,12 +23,15 @@ import {
   seedFirestoreCollections 
 } from "../services/firebase";
 import { getDbStatus, seedDatabase } from "../services/apiService";
+import { LanguageSelector } from "./LanguageSelector";
+import { SUPPORTED_LANGUAGES } from "../data/translations";
 
 export const FirebaseSettingsModal = ({ 
   isOpen, 
   onClose, 
   t, 
   lang,
+  setLang,
   onResetToDefaults,
   currentData
 }) => {
@@ -200,6 +204,17 @@ service cloud.firestore {
             }`}
           >
             Security Rules (firestore.rules)
+          </button>
+          <button
+            onClick={() => setActiveTab("language")}
+            className={`pb-2.5 border-b-2 transition flex items-center space-x-1.5 whitespace-nowrap ${
+              activeTab === "language" 
+                ? "border-amber-500 text-gov-950 font-black" 
+                : "border-transparent text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <Globe className="w-3.5 h-3.5 text-amber-500" />
+            <span>{t.language || "Language"} ({SUPPORTED_LANGUAGES.find(l => l.code === lang)?.nativeName || "English"})</span>
           </button>
         </div>
 
@@ -487,6 +502,46 @@ service cloud.firestore {
               <pre className="p-3.5 bg-slate-900 text-emerald-400 font-mono text-[11px] rounded-xl overflow-x-auto max-h-56 leading-relaxed">
                 {rulesContent}
               </pre>
+            </div>
+          )}
+
+          {/* TAB 4: LANGUAGE PREFERENCES */}
+          {activeTab === "language" && (
+            <div className="space-y-4">
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="p-2.5 bg-gov-900 text-amber-400 rounded-xl">
+                    <Globe className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-extrabold text-slate-900">
+                      {t.languageSetting || "Portal & App Language Preference"}
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      {t.languageSettingSubtitle || "Choose your preferred language across web portal and Android app."}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-3">
+                  <LanguageSelector 
+                    currentLang={lang} 
+                    onSelectLanguage={(newLang) => {
+                      if (setLang) setLang(newLang);
+                      setSyncStatus(`${t.languageChangedNotification || "Language changed successfully"}`);
+                      setTimeout(() => setSyncStatus(""), 3500);
+                    }} 
+                    variant="grid" 
+                  />
+                </div>
+              </div>
+
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-start space-x-2">
+                <ShieldCheck className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
+                <p>
+                  Language preferences are saved locally and applied instantly across all dashboard views, maps, forms, and reports. Official administrative records and village names remain untranslated.
+                </p>
+              </div>
             </div>
           )}
 

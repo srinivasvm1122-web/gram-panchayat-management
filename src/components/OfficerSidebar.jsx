@@ -28,21 +28,41 @@ export const OfficerSidebar = ({
   villageCount = 10 
 }) => {
   const sidebarItems = [
-    { id: "dashboard", label: "1. Dashboard", labelKn: "1. ಡ್ಯಾಶ್‌ಬೋರ್ಡ್", icon: LayoutDashboard, badge: "Overview" },
-    { id: "villages", label: "2. Manage Villages", labelKn: "2. ಗ್ರಾಮಗಳ ನಿರ್ವಹಣೆ", icon: MapPin, badge: villageCount },
-    { id: "villageMap", label: "3. 10 Villages Map", labelKn: "3. ಗ್ರಾಮಗಳ ನಕ್ಷೆ (GIS)", icon: Map, badge: "GPS" },
-    { id: "members", label: "4. Village People & Records", labelKn: "4. ಗ್ರಾಮದ ನಾಗರಿಕರು & ದಾಖಲೆಗಳು", icon: Users, badge: "300" },
-    { id: "population", label: "5. Population Management", labelKn: "5. ಜನಸಂಖ್ಯೆ ನಿರ್ವಹಣೆ", icon: Users, badge: "Demographics" },
-    { id: "families", label: "6. Family Management", labelKn: "6. ಕುಟುಂಬ ನಿರ್ವಹಣೆ", icon: Home, badge: "Housing" },
-    { id: "rations", label: "7. APL/BPL Management", labelKn: "7. APL/BPL ನಿರ್ವಹಣೆ", icon: CreditCard, badge: "PDS" },
-    { id: "elections", label: "8. Election Management", labelKn: "8. ಚುನಾವಣೆ ನಿರ್ವಹಣೆ", icon: Vote, badge: "Results" },
-    { id: "funds", label: "9. Funds Management", labelKn: "9. ನಿಧಿ ನಿರ್ವಹಣೆ", icon: Wallet, badge: "Grants" },
-    { id: "transactions", label: "10. Transactions", labelKn: "10. ವಹಿವಾಟುಗಳು", icon: FileSpreadsheet, badge: "Vouchers" },
-    { id: "reports", label: "11. Reports", labelKn: "11. ವರದಿಗಳು", icon: FileText, badge: "PDF/XLS" },
-    { id: "documents", label: "12. Document Management", labelKn: "12. ಕಡತಗಳ ನಿರ್ವಹಣೆ", icon: FolderArchive, badge: "Orders" },
-    { id: "audit", label: "13. Audit History", labelKn: "13. ಆಡಿಟ್ ಇತಿಹಾಸ", icon: History, badge: "Security" },
-    { id: "logout", label: "Logout", labelKn: "ನಿರ್ಗಮಿಸಿ (Logout)", icon: LogOut, isAction: true }
+    { id: "dashboard", label: "1. Dashboard", icon: LayoutDashboard, badge: "Overview" },
+    { id: "villages", label: "2. Manage Villages", icon: MapPin, badge: villageCount },
+    { id: "villageMap", label: "3. 10 Villages Map", icon: Map, badge: "GPS" },
+    { id: "members", label: "4. Village People & Records", icon: Users, badge: "300" },
+    { id: "population", label: "5. Population Management", icon: Users, badge: "Demographics" },
+    { id: "families", label: "6. Family Management", icon: Home, badge: "Housing" },
+    { id: "rations", label: "7. APL/BPL Management", icon: CreditCard, badge: "PDS" },
+    { id: "elections", label: "8. Election Management", icon: Vote, badge: "Results" },
+    { id: "funds", label: "9. Funds Management", icon: Wallet, badge: "Grants" },
+    { id: "transactions", label: "10. Transactions", icon: FileSpreadsheet, badge: "Vouchers" },
+    { id: "reports", label: "11. Reports", icon: FileText, badge: "PDF/XLS" },
+    { id: "documents", label: "12. Document Management", icon: FolderArchive, badge: "Orders" },
+    { id: "audit", label: "13. Audit History", icon: History, badge: "Security" },
+    { id: "logout", label: "Logout", icon: LogOut, isAction: true }
   ];
+
+  const getSidebarLabel = (item) => {
+    switch (item.id) {
+      case "dashboard": return `1. ${t.navHome || "Dashboard"}`;
+      case "villages": return `2. ${t.navVillages || "Manage Villages"}`;
+      case "villageMap": return `3. ${t.pageVillageMap || t.navVillageMap || "10 Villages Map"}`;
+      case "members": return `4. ${t.pageMembers || t.navMembers || "Village People"}`;
+      case "population": return `5. ${t.pagePopulation || t.navPopulation || "Population"}`;
+      case "families": return `6. ${t.totalFamilies || "Families"}`;
+      case "rations": return `7. ${t.pageRations || t.navRations || "APL/BPL"}`;
+      case "elections": return `8. ${t.pageElections || t.navElections || "Elections"}`;
+      case "funds": return `9. ${t.pageFunds || t.navFunds || "Funds"}`;
+      case "transactions": return `10. ${t.allTransactions || "Transactions"}`;
+      case "reports": return `11. ${t.pageReports || t.navReports || "Reports"}`;
+      case "documents": return `12. ${t.documentsTitle || "Documents"}`;
+      case "audit": return `13. ${t.navAudit || "Audit History"}`;
+      case "logout": return t.logoutBtn || "Logout";
+      default: return item.label;
+    }
+  };
 
   return (
     <aside className="w-full lg:w-72 bg-white rounded-3xl border border-slate-200 shadow-md p-4 flex flex-col justify-between flex-shrink-0">
@@ -85,7 +105,7 @@ export const OfficerSidebar = ({
                 >
                   <div className="flex items-center space-x-2.5">
                     <Icon className="w-4 h-4" />
-                    <span>{lang === "kn" ? item.labelKn : item.label}</span>
+                    <span>{getSidebarLabel(item)}</span>
                   </div>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
@@ -104,7 +124,7 @@ export const OfficerSidebar = ({
               >
                 <div className="flex items-center space-x-2.5 truncate">
                   <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? "text-amber-400" : "text-slate-500"}`} />
-                  <span className="truncate">{lang === "kn" ? item.labelKn : item.label}</span>
+                  <span className="truncate">{getSidebarLabel(item)}</span>
                 </div>
                 {item.badge && (
                   <span

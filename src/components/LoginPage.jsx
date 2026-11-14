@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { initFirebase } from "../services/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { LanguageSelector } from "./LanguageSelector";
 
 export const LoginPage = ({ 
   onLoginSuccess, 
@@ -24,6 +25,7 @@ export const LoginPage = ({
   currentUser, 
   t, 
   lang,
+  setLang,
   initialTab = "officer" // "officer" or "public"
 }) => {
   const [activeLoginType, setActiveLoginType] = useState(initialTab);
@@ -38,6 +40,27 @@ export const LoginPage = ({
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotStatus, setForgotStatus] = useState(null);
   const [isForgotSubmitting, setIsForgotSubmitting] = useState(false);
+  const getLoginErrorMessage = (type) => {
+    if (type === "mandatory") {
+      return {
+        kn: "ಯೂಸರ್‌ನೇಮ್ / ಇಮೇಲ್ ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್ ಎರಡೂ ಕಡ್ಡಾಯವಾಗಿದೆ.",
+        hi: "यूज़रनेम / ईमेल और पासवर्ड दोनों अनिवार्य हैं।",
+        mr: "युझरनेम / ईमेल आणि पासवर्ड दोन्ही आवश्यक आहेत.",
+        ta: "பயனர்பெயர் / மின்னஞ்சல் மற்றும் கடவுச்சொல் இரண்டும் கட்டாயமாகும்.",
+        te: "యూజర్‌నేమ్ / ఈమెయిల్ మరియు పాస్‌వర్డ్ రెండూ తప్పనిసరి.",
+        en: "Both Username / Email and Password are mandatory."
+      }[lang] || "Both Username / Email and Password are mandatory.";
+    }
+    return {
+      kn: "ತಪ್ಪಾದ ಯೂಸರ್‌ನೇಮ್ ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್. ಅಧಿಕೃತ ಗ್ರಾಮ ಪಂಚಾಯತಿ ಅಧಿಕಾರಿಗಳಿಗೆ ಮಾತ್ರ ಪ್ರವೇಶವಿದೆ.",
+      hi: "गलत यूज़रनेम या पासवर्ड। केवल अधिकृत ग्राम पंचायत अधिकारियों को ही प्रवेश की अनुमति है।",
+      mr: "चुकीचे युझरनेम किंवा पासवर्ड. केवळ अधिकृत ग्रामपंचायत अधिकाऱ्यांनाच प्रवेश आहे.",
+      ta: "தவறான பயனர்பெயர் அல்லது கடவுச்சொல். அங்கீகரிக்கப்பட்ட கிராம பஞ்சாயத்து அதிகாரிகளுக்கு மட்டுமே அனுமதி.",
+      te: "తప్పుడు యూజర్‌నేమ్ లేదా పాస్‌వర్డ్. అధీకృత గ్రామ పంచాయతీ అధికారులకు మాత్రమే ప్రవేశం ఉంది.",
+      en: "Incorrect username or password. Access is restricted to authorized Gram Panchayat Officers."
+    }[lang] || "Incorrect username or password. Access is restricted to authorized Gram Panchayat Officers.";
+  };
+
 
   const handleOfficerLogin = async (e) => {
     e.preventDefault();
@@ -47,11 +70,7 @@ export const LoginPage = ({
     const cleanPassword = password.trim();
 
     if (!trimmedInput || !password) {
-      setError(
-        lang === "kn"
-          ? "ಯೂಸರ್‌ನೇಮ್ / ಇಮೇಲ್ ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್ ಎರಡೂ ಕಡ್ಡಾಯವಾಗಿದೆ."
-          : "Both Username / Email and Password are mandatory."
-      );
+      setError(getLoginErrorMessage("mandatory"));
       return;
     }
 
@@ -135,11 +154,7 @@ export const LoginPage = ({
       }
 
       // If credentials do not match
-      setError(
-        lang === "kn"
-          ? "ತಪ್ಪಾದ ಯೂಸರ್‌ನೇಮ್ ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್. ಅಧಿಕೃತ ಗ್ರಾಮ ಪಂಚಾಯತಿ ಅಧಿಕಾರಿಗಳಿಗೆ ಮಾತ್ರ ಪ್ರವೇಶವಿದೆ."
-          : "Incorrect username or password. Access is restricted to authorized Gram Panchayat Officers."
-      );
+      setError(getLoginErrorMessage("invalid"));
     } catch (err) {
       console.error("Login verification error:", err);
       if (isOwnerCredentials) {
@@ -156,11 +171,7 @@ export const LoginPage = ({
         };
         onLoginSuccess(officerProfile);
       } else {
-        setError(
-          lang === "kn"
-            ? "ತಪ್ಪಾದ ಯೂಸರ್‌ನೇಮ್ ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್. ಅಧಿಕೃತ ಗ್ರಾಮ ಪಂಚಾಯತಿ ಅಧಿಕಾರಿಗಳಿಗೆ ಮಾತ್ರ ಪ್ರವೇಶವಿದೆ."
-            : "Incorrect username or password. Access is restricted to authorized Gram Panchayat Officers."
-        );
+        setError(getLoginErrorMessage("invalid"));
       }
     } finally {
       setIsLoading(false);
@@ -211,6 +222,17 @@ export const LoginPage = ({
           {t.loginPortalSubtitle || "Official Karnataka Panchayati Raj E-Governance Secure Gateway"}
         </p>
       </div>
+
+      {/* Multilingual Quick Language Switcher */}
+      {setLang && (
+        <div className="flex justify-center mb-5">
+          <LanguageSelector 
+            currentLang={lang} 
+            onSelectLanguage={setLang} 
+            variant="inline" 
+          />
+        </div>
+      )}
 
       {/* Two Tab Buttons: Officer Login vs Public User Access */}
       <div className="flex bg-white rounded-2xl p-1.5 border border-slate-200 shadow-sm max-w-xl mx-auto mb-6">

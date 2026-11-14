@@ -16,8 +16,8 @@ export const MobileNav = ({ activeTab, setActiveTab, t, isOfficer }) => {
     { id: "villageMap", label: t.pageVillageMap || "Map", icon: Map },
     { id: "funds", label: t.navFunds, icon: Wallet },
     isOfficer 
-      ? { id: "admin", label: "Admin", icon: ShieldCheck }
-      : { id: "officerLogin", label: "Officer", icon: Lock }
+      ? { id: "admin", label: t.navAdmin || "Admin", icon: ShieldCheck }
+      : { id: "officerLogin", label: t.officerLoginBtn || "Officer", icon: Lock }
   ];
 
   return (

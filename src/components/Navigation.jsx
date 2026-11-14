@@ -36,14 +36,14 @@ export const Navigation = ({ activeTab, setActiveTab, t, isOfficer, isSuperAdmin
     });
     navItems.push({ 
       id: "publicLogin", 
-      label: "Public View", 
+      label: t.rolePublic || "Public View", 
       icon: UserCheck, 
       badge: "Switch" 
     });
   } else {
     navItems.push({ 
       id: "officerLogin", 
-      label: t.pageOfficerLogin, 
+      label: t.pageOfficerLogin || "Officer Login", 
       icon: Lock, 
       badge: "Login" 
     });

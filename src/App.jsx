@@ -20,6 +20,7 @@ import { EditDashboardModal } from "./components/EditDashboardModal";
 import { FamilyManagement } from "./components/FamilyManagement";
 import { DocumentManagement } from "./components/DocumentManagement";
 import { VillageMap } from "./components/VillageMap";
+import { FirstTimeLanguageModal } from "./components/FirstTimeLanguageModal";
 import { updateVillageInDb } from "./services/apiService";
 
 import { translations } from "./data/translations";
@@ -72,7 +73,15 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedVillageForDetails, setSelectedVillageForDetails] = useState(null);
   const [isFirebaseModalOpen, setIsFirebaseModalOpen] = useState(false);
+  const [isFirstTimeModalOpen, setIsFirstTimeModalOpen] = useState(() => !localStorage.getItem("gp_language_chosen"));
   const [notification, setNotification] = useState(null);
+
+  const handleConfirmFirstTimeLanguage = (selectedLanguage) => {
+    setLang(selectedLanguage);
+    localStorage.setItem("gp_language_chosen", "true");
+    setIsFirstTimeModalOpen(false);
+    showNotification(translations[selectedLanguage]?.languageChangedNotification || "Language preference saved successfully", "success");
+  };
 
   // Active translation dictionary
   const t = translations[lang] || translations.en;
@@ -576,6 +585,7 @@ export default function App() {
                 electionData={electionData}
                 t={t}
                 lang={lang}
+                setLang={setLang}
                 isOfficer={isOfficer}
                 onNavigateToLogin={() => setActiveTab("officerLogin")}
                 setActiveTab={setActiveTab}
@@ -599,6 +609,7 @@ export default function App() {
                 villages={villages}
                 t={t}
                 lang={lang}
+                setLang={setLang}
                 isOfficer={isOfficer}
                 onAddVillage={handleAddVillage}
                 onUpdateVillage={handleUpdateVillage}
@@ -614,6 +625,7 @@ export default function App() {
                 villages={villages}
                 t={t}
                 lang={lang}
+                setLang={setLang}
                 isOfficer={isOfficer}
                 onUpdateVillage={handleUpdateVillage}
                 onSelectVillageForDetails={(v) => setSelectedVillageForDetails(v)}
@@ -697,6 +709,7 @@ export default function App() {
                 villages={villages}
                 t={t}
                 lang={lang}
+                setLang={setLang}
                 isOfficer={isOfficer}
                 onAddTransaction={handleAddTransaction}
                 onExportPdf={() => handleExportPdf("funds")}
@@ -741,6 +754,7 @@ export default function App() {
                 currentUser={currentUser}
                 t={t}
                 lang={lang}
+                setLang={setLang}
               />
             )}
 
@@ -753,6 +767,7 @@ export default function App() {
                 currentUser={currentUser}
                 t={t}
                 lang={lang}
+                setLang={setLang}
               />
             )}
 
@@ -880,6 +895,7 @@ export default function App() {
         onClose={() => setIsFirebaseModalOpen(false)}
         t={t}
         lang={lang}
+        setLang={setLang}
         onResetToDefaults={handleResetToDefaults}
         currentData={{
           villages,
@@ -887,6 +903,14 @@ export default function App() {
           transactions,
           electionData
         }}
+      />
+
+      {/* First-Time User Language Selection Modal */}
+      <FirstTimeLanguageModal
+        isOpen={isFirstTimeModalOpen}
+        currentLang={lang}
+        onConfirmLanguage={handleConfirmFirstTimeLanguage}
+        t={t}
       />
 
       {/* Edit Dashboard Statistics Modal (Full Officer Edit Access) */}

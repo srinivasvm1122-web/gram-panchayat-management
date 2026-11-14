@@ -98,7 +98,7 @@ export const VillageDetailModal = ({ village, onClose, t, lang, onPrintVillage }
           <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
             <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wide flex items-center space-x-2">
               <Users className="w-4 h-4 text-gov-800" />
-              <span>{lang === "kn" ? "ಜನಸಂಖ್ಯಾ ಲಿಂಗ ಅನುಪಾತ" : "Gender & Living Population Breakdown"}</span>
+              <span>{t.populationTitle || "Gender & Living Population Breakdown"}</span>
             </h4>
 
             <div className="grid grid-cols-2 gap-4 text-xs">
@@ -124,7 +124,7 @@ export const VillageDetailModal = ({ village, onClose, t, lang, onPrintVillage }
           <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
             <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wide flex items-center space-x-2">
               <CreditCard className="w-4 h-4 text-amber-700" />
-              <span>{lang === "kn" ? "ಪಡಿತರ ಚೀಟಿ ಫಲಾನುಭವಿಗಳ ವಿವರಣೆ" : "Ration Cards (APL & BPL Classification)"}</span>
+              <span>{t.rationTitle || "Ration Cards"}</span>
             </h4>
 
             <div className="grid grid-cols-2 gap-4 text-xs">
@@ -150,7 +150,7 @@ export const VillageDetailModal = ({ village, onClose, t, lang, onPrintVillage }
           <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
             <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wide flex items-center space-x-2">
               <Vote className="w-4 h-4 text-purple-700" />
-              <span>{lang === "kn" ? "ಮತದಾರರ ನೋಂದಣಿ ಮತ್ತು ಮತದಾನ" : "Electoral Registration & Voting Turnout"}</span>
+              <span>{t.electionTitle || "Electoral Registration & Voting Turnout"}</span>
             </h4>
 
             <div className="grid grid-cols-3 gap-3 text-xs">
@@ -177,8 +177,8 @@ export const VillageDetailModal = ({ village, onClose, t, lang, onPrintVillage }
               <MapPin className="w-4 h-4 text-emerald-700 flex-shrink-0" />
               <span>
                 {village.latitude && village.longitude 
-                  ? `GPS Coordinates: ${Number(village.latitude).toFixed(4)}° N, ${Number(village.longitude).toFixed(4)}° E`
-                  : (lang === "kn" ? "ಸ್ಥಳ ನಿರ್ದೇಶಾಂಕಗಳನ್ನು ಇನ್ನೂ ನಮೂದಿಸಿಲ್ಲ (GPS Not Configured)" : "GPS Location Not Configured")}
+                  ? `${t.mapLocationConfigured || "GPS Coordinates"}: ${Number(village.latitude).toFixed(4)}° N, ${Number(village.longitude).toFixed(4)}° E`
+                  : (t.mapNotConfiguredMsg || "GPS Location Not Configured")}
               </span>
             </div>
             {village.latitude && village.longitude && (
@@ -188,7 +188,7 @@ export const VillageDetailModal = ({ village, onClose, t, lang, onPrintVillage }
                 rel="noopener noreferrer"
                 className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition text-center"
               >
-                {lang === "kn" ? "ಗೂಗಲ್ ಮ್ಯಾಪ್ಸ್ ಮಾರ್ಗ" : "Open in Google Maps"}
+                {t.mapOpenDirections || "Open in Google Maps"}
               </a>
             )}
           </div>

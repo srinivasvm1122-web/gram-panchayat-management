@@ -299,7 +299,7 @@ export const VillageMap = ({
               border-radius: 8px;
               cursor: pointer;
             ">
-              ${lang === "kn" ? "ಸಂಪೂರ್ಣ ವಿವರಣೆ ನೋಡಿ (View Details)" : "View Details"}
+              ${t.viewDetails || "View Details"}
             </button>
             <a href="${gmapsDirUrl}" target="_blank" rel="noopener noreferrer" style="
               width: 100%;
@@ -313,7 +313,7 @@ export const VillageMap = ({
               text-decoration: none;
               box-sizing: border-box;
             ">
-              ${lang === "kn" ? "ಗೂಗಲ್ ಮ್ಯಾಪ್ಸ್ ಮಾರ್ಗ (Google Maps)" : "Open Directions in Google Maps"}
+              ${t.mapOpenDirections || "Open Directions in Google Maps"}
             </a>
           </div>
         </div>
@@ -490,7 +490,7 @@ export const VillageMap = ({
           <div className="flex flex-wrap items-center gap-2.5 bg-gov-900/80 p-3 rounded-2xl border border-slate-700/60 self-start md:self-auto">
             <div className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-center">
               <span className="text-[10px] text-emerald-300 font-bold block uppercase tracking-wider">
-                {lang === "kn" ? "ನಕ್ಷೆಗೊಳಿಸಿದ ಗ್ರಾಮಗಳು" : "GPS Mapped"}
+                {t.mapTotalMapped || "GPS Mapped"}
               </span>
               <span className="text-lg font-black text-emerald-400">
                 {mappedVillages.length} / {villages.length}
@@ -499,7 +499,7 @@ export const VillageMap = ({
 
             <div className="px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-center">
               <span className="text-[10px] text-amber-300 font-bold block uppercase tracking-wider">
-                {lang === "kn" ? "ಸ್ಥಳ ಬಾಕಿ" : "Unmapped"}
+                {t.mapTotalUnmapped || "Unmapped"}
               </span>
               <span className="text-lg font-black text-amber-400">
                 {unmappedVillages.length}
@@ -770,7 +770,7 @@ export const VillageMap = ({
                       title="Fly to marker on map"
                     >
                       <MapPin className="w-3.5 h-3.5 text-amber-400" />
-                      <span>{lang === "kn" ? "ನಕ್ಷೆಯಲ್ಲಿ ನೋಡಿ" : "View on Map"}</span>
+                      <span>{t.pageVillageMap || "View on Map"}</span>
                     </button>
                   )}
 
@@ -784,7 +784,7 @@ export const VillageMap = ({
                       title="Open Google Maps Route Directions"
                     >
                       <NavIcon className="w-3.5 h-3.5" />
-                      <span>{lang === "kn" ? "ಮಾರ್ಗ (Directions)" : "Directions"}</span>
+                      <span>{t.mapOpenDirections ? (t.mapOpenDirections.split(" ")[0] || "Directions") : "Directions"}</span>
                     </a>
                   )}
 
@@ -795,7 +795,7 @@ export const VillageMap = ({
                     title="View full demographic profile"
                   >
                     <Eye className="w-3.5 h-3.5 text-slate-600" />
-                    <span>{lang === "kn" ? "ವಿವರ" : "Details"}</span>
+                    <span>{t.viewDetails || "Details"}</span>
                   </button>
 
                   {/* Officer Only: Add/Edit GPS Coordinates */}
@@ -806,7 +806,7 @@ export const VillageMap = ({
                       title="Authorized Officer: Configure GPS coordinates"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
-                      <span>{hasGps ? (lang === "kn" ? "ತಿದ್ದುಪಡಿ" : "Edit GPS") : (lang === "kn" ? "+ ನಿರ್ದೇಶಾಂಕ" : "+ Add GPS")}</span>
+                      <span>{hasGps ? (t.mapEditCoordinates || "Edit GPS") : (t.mapAddCoordinates || "+ Add GPS")}</span>
                     </button>
                   )}
                 </div>
@@ -831,7 +831,7 @@ export const VillageMap = ({
                 </div>
                 <div>
                   <h3 className="font-extrabold text-slate-900 text-lg">
-                    {lang === "kn" ? "ಗ್ರಾಮದ GPS ನಿರ್ದೇಶಾಂಕ ನಿರ್ವಹಣೆ" : "Manage Village GPS Coordinates"}
+                    {t.mapTitle || "Manage Village GPS Coordinates"}
                   </h3>
                   <p className="text-xs text-slate-500">
                     {editingVillage.nameEn} ({editingVillage.nameKn}) • Ward {editingVillage.wardNo}
@@ -866,7 +866,7 @@ export const VillageMap = ({
             <div className="space-y-3">
               <div>
                 <label className="text-xs font-bold text-slate-700 block mb-1">
-                  {lang === "kn" ? "ಅಕ್ಷಾಂಶ (Latitude)" : "Latitude (North/South)"} *
+                  {t.mapLatitude || "Latitude"} *
                 </label>
                 <input
                   type="text"
@@ -880,7 +880,7 @@ export const VillageMap = ({
 
               <div>
                 <label className="text-xs font-bold text-slate-700 block mb-1">
-                  {lang === "kn" ? "ರೇಖಾಂಶ (Longitude)" : "Longitude (East/West)"} *
+                  {t.mapLongitude || "Longitude"} *
                 </label>
                 <input
                   type="text"
@@ -906,7 +906,7 @@ export const VillageMap = ({
                   className="px-3 py-1.5 rounded-xl bg-gov-900 hover:bg-gov-800 text-white text-xs font-bold transition flex items-center space-x-1.5 disabled:opacity-50"
                 >
                   <Crosshair className="w-3.5 h-3.5 text-amber-400" />
-                  <span>{geoLocating ? "Reading GPS..." : (lang === "kn" ? "ಮೊಬೈಲ್ GPS ಪಡೆಯಿರಿ" : "Use Device GPS")}</span>
+                  <span>{geoLocating ? "Reading GPS..." : (t.mapUseDeviceGps || "Use Device GPS")}</span>
                 </button>
 
                 {KARNATAKA_WARD_COORDINATES_REFERENCE[editingVillage.id] && (
@@ -916,7 +916,7 @@ export const VillageMap = ({
                     className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-gov-950 text-xs font-bold transition flex items-center space-x-1.5"
                   >
                     <Compass className="w-3.5 h-3.5" />
-                    <span>{lang === "kn" ? "ಅಧಿಕೃತ ವಾರ್ಡ್ ಕೇಂದ್ರ ನಿರ್ದೇಶಾಂಕ" : "Load Ward Center Reference"}</span>
+                    <span>{t.mapPresetNotice || "Load Ward Center Reference"}</span>
                   </button>
                 )}
               </div>
@@ -930,7 +930,7 @@ export const VillageMap = ({
                   onClick={handleClearCoordinates}
                   className="px-3 py-2 rounded-xl text-red-600 hover:bg-red-50 text-xs font-bold transition"
                 >
-                  {lang === "kn" ? "ನಿರ್ದೇಶಾಂಕ ತೆಗೆದುಹಾಕಿ" : "Clear Location"}
+                  {t.mapResetCoordinates || "Clear Location"}
                 </button>
               ) : <div></div>}
 
@@ -948,7 +948,7 @@ export const VillageMap = ({
                   className="px-5 py-2 rounded-xl bg-gov-900 hover:bg-gov-800 text-white text-xs font-extrabold transition flex items-center space-x-1.5 shadow-md"
                 >
                   <Save className="w-3.5 h-3.5 text-amber-400" />
-                  <span>{lang === "kn" ? "ಉಳಿಸಿ (Save)" : "Save Coordinates"}</span>
+                  <span>{t.mapSaveCoordinates || "Save Coordinates"}</span>
                 </button>
               </div>
             </div>

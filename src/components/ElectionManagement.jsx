@@ -148,9 +148,7 @@ export const ElectionManagement = ({
               <span>{t.declaredResults}</span>
             </h3>
             <p className="text-xs text-slate-500">
-              {lang === "kn" 
-                ? "ಚುನಾವಣಾ ಆಯೋಗದ ಸಹಾಯಕ ಚುನಾವಣಾಧಿಕಾರಿ (Returning Officer) ಪ್ರಮಾಣೀಕರಿಸಿದ ಗೆಜೆಟ್ ಫಲಿತಾಂಶಗಳು."
-                : "Certified ward winners declared by Karnataka State Election Commission Returning Officer."}
+              {t.electionSubtitle || "Certified ward winners declared by Karnataka State Election Commission Returning Officer."}
             </p>
           </div>
 
@@ -238,9 +236,7 @@ export const ElectionManagement = ({
           <span>{t.villageWiseReport}</span>
         </h3>
         <p className="text-xs text-slate-500 mb-5">
-          {lang === "kn" 
-            ? "ಪ್ರತಿಯೊಂದು ಗ್ರಾಮದ ಮತದಾರರ ನೋಂದಣಿ, ಪುರುಷ ಮತ್ತು ಮಹಿಳಾ ಮತದಾರರ ವಿವರ ಮತ್ತು ಚಲಾವಣೆಯಾದ ಒಟ್ಟು ಮತಗಳು."
-            : "Aggregated ward level voter registration, gender distribution and voting turnout percentage."}
+          {t.villageWiseReport || "Aggregated ward level voter registration, gender distribution and voting turnout percentage."}
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

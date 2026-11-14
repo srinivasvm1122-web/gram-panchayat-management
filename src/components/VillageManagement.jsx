@@ -556,9 +556,7 @@ export const VillageManagement = ({
                   <span>{isAddModalOpen ? t.addVillage : t.editVillage}</span>
                 </h3>
                 <p className="text-xs text-sky-200">
-                  {lang === "kn" 
-                    ? "ಗ್ರಾಮದ ಜನಸಂಖ್ಯೆ, ಪಡಿತರ ಚೀಟಿ ಮತ್ತು ಮತದಾರರ ಅಧಿಕೃತ ದಾಖಲೆ."
-                    : "Official demographic and voter profile entry form."}
+                  {t.villagesSubtitle || "Official demographic and voter profile entry form."}
                 </p>
               </div>
               <button 
@@ -628,7 +626,7 @@ export const VillageManagement = ({
               {/* Demographics: Total, Living, Male, Female */}
               <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
                 <span className="text-xs font-extrabold text-gov-900 uppercase tracking-wide block">
-                  1. {lang === "kn" ? "ಜನಸಂಖ್ಯಾ ಅಂಕಿಅಂಶಗಳು" : "Population Demographics"}
+                  1. {t.populationTitle || "Population Demographics"}
                 </span>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -688,7 +686,7 @@ export const VillageManagement = ({
               {/* Families & Ration Cards (APL & BPL) */}
               <div className="p-4 bg-cyan-50/50 rounded-xl border border-cyan-100 space-y-3">
                 <span className="text-xs font-extrabold text-cyan-900 uppercase tracking-wide block">
-                  2. {lang === "kn" ? "ಕುಟುಂಬ ಮತ್ತು ಪಡಿತರ ಚೀಟಿಗಳು (APL/BPL)" : "Households & Ration Cards"}
+                  2. {t.rationTitle || "Households & Ration Cards"}
                 </span>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -735,7 +733,7 @@ export const VillageManagement = ({
               {/* Voters: Total, Male, Female, Votes Cast */}
               <div className="p-4 bg-purple-50/50 rounded-xl border border-purple-100 space-y-3">
                 <span className="text-xs font-extrabold text-purple-900 uppercase tracking-wide block">
-                  3. {lang === "kn" ? "ಮತದಾರರ ಅಂಕಿಅಂಶಗಳು ಮತ್ತು ಮತದಾನ" : "Voter Registry & Turnout"}
+                  3. {t.electionTitle || "Voter Registry & Turnout"}
                 </span>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

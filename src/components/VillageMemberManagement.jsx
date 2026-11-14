@@ -320,10 +320,10 @@ export const VillageMemberManagement = ({
               <span>Village People & Family Records Management • 10 Villages</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
-              {lang === "kn" ? t.membersTitle : "Village People & Family Records Management"}
+              {t.membersTitle || "Village People & Family Records Management"}
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-              {lang === "kn" ? t.membersSubtitle : "Individual citizen records, household mapping, ration eligibility and monthly medical checkup tracking."}
+              {t.membersSubtitle || "Individual citizen records, household mapping, ration eligibility and monthly medical checkup tracking."}
             </p>
           </div>
 
@@ -439,7 +439,7 @@ export const VillageMemberManagement = ({
               <div className="flex items-center space-x-2">
                 <ShieldCheck className="w-4 h-4 text-indigo-700" />
                 <span className="font-extrabold text-sm text-slate-900">
-                  {lang === "kn" ? t.categorySummaryTitle : "Village-Wise Category Demographics Summary (Statutory Rollup)"}
+                  {t.categorySummaryTitle || "Village-Wise Category Demographics Summary (Statutory Rollup)"}
                 </span>
                 <span className="text-[10px] bg-indigo-100 text-indigo-900 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
                   Officer Confidential
@@ -467,7 +467,7 @@ export const VillageMemberManagement = ({
             {showCategorySummary && (
               <>
                 <p className="text-xs text-slate-500 mb-3">
-                  {lang === "kn" ? t.categorySummarySubtitle : "Consolidated rollups across General, OBC, SC, ST, Other and Not Disclosed for welfare schemes and statutory reporting."}
+                  {t.categorySummarySubtitle || "Consolidated rollups across General, OBC, SC, ST, Other and Not Disclosed for welfare schemes and statutory reporting."}
                 </p>
 
                 {/* 6 Category Summary Cards */}

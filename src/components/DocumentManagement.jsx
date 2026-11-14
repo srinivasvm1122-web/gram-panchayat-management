@@ -110,7 +110,14 @@ export const DocumentManagement = ({
               <span>Section 10: Official Gazette & Sanction Orders Archive</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
-              {lang === "kn" ? "ಅಧಿಕೃತ ಕಡತಗಳು ಮತ್ತು ಆದೇಶಗಳ ನಿರ್ವಹಣೆ" : "Document & Sanction Orders Management"}
+              {({
+                kn: "ಅಧಿಕೃತ ಕಡತಗಳು ಮತ್ತು ಆದೇಶಗಳ ನಿರ್ವಹಣೆ",
+                hi: "दस्तावेज़ एवं स्वीकृति आदेश प्रबंधन",
+                mr: "कागदपत्रे व मंजुरी आदेश व्यवस्थापन",
+                ta: "ஆவணங்கள் மற்றும் ஒப்புதல் ஆணைகள் மேலாண்மை",
+                te: "పత్రాలు మరియు మంజూరు ఉత్తర్వుల నిర్వహణ",
+                en: "Document & Sanction Orders Management"
+              })[lang] || "Document & Sanction Orders Management"}
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
               Repository of Government circulars, 15th FC approvals, work completion certificates and tender notices.
