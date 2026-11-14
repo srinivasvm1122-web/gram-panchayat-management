@@ -19,6 +19,8 @@ import { OfficerSidebar } from "./components/OfficerSidebar";
 import { EditDashboardModal } from "./components/EditDashboardModal";
 import { FamilyManagement } from "./components/FamilyManagement";
 import { DocumentManagement } from "./components/DocumentManagement";
+import { VillageMap } from "./components/VillageMap";
+import { updateVillageInDb } from "./services/apiService";
 
 import { translations } from "./data/translations";
 import { 
@@ -177,7 +179,8 @@ export default function App() {
       return;
     }
     setVillages(prev => prev.map(v => v.id === updatedVillage.id ? updatedVillage : v));
-    addAuditLog("VILLAGE_UPDATED", `Officer ${currentUser.name} updated demographic records for ${updatedVillage.nameEn}.`);
+    updateVillageInDb(updatedVillage).catch(() => {});
+    addAuditLog("VILLAGE_UPDATED", `Officer ${currentUser.name} updated records / GPS coordinates for ${updatedVillage.nameEn} (Ward ${updatedVillage.wardNo}).`);
     showNotification(t.villageUpdatedSuccess);
   };
 
@@ -470,6 +473,12 @@ export default function App() {
               2. {t.pageVillages} ({villages.length})
             </button>
             <button 
+              onClick={() => { setActiveTab("villageMap"); setMobileMenuOpen(false); }}
+              className="p-2 rounded-lg bg-gov-800 text-left text-amber-300 font-bold"
+            >
+              📍 {lang === "kn" ? "ಗ್ರಾಮಗಳ ನಕ್ಷೆ (GIS Map)" : "10 Villages Map (GIS)"}
+            </button>
+            <button 
               onClick={() => { setActiveTab("members"); setMobileMenuOpen(false); }}
               className="p-2 rounded-lg bg-gov-800 text-left"
             >
@@ -596,6 +605,18 @@ export default function App() {
                 onDeleteVillage={handleDeleteVillage}
                 onSelectVillageForDetails={(v) => setSelectedVillageForDetails(v)}
                 onExportExcel={handleExportExcel}
+              />
+            )}
+
+            {/* PAGE: 10 VILLAGES GIS MAP */}
+            {(activeTab === "villageMap" || activeTab === "map") && (
+              <VillageMap
+                villages={villages}
+                t={t}
+                lang={lang}
+                isOfficer={isOfficer}
+                onUpdateVillage={handleUpdateVillage}
+                onSelectVillageForDetails={(v) => setSelectedVillageForDetails(v)}
               />
             )}
 

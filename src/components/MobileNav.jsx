@@ -5,14 +5,15 @@ import {
   Users, 
   Wallet, 
   Lock,
-  ShieldCheck
+  ShieldCheck,
+  Map
 } from "lucide-react";
 
 export const MobileNav = ({ activeTab, setActiveTab, t, isOfficer }) => {
   const primaryTabs = [
     { id: "home", label: t.navHome, icon: LayoutDashboard },
     { id: "villages", label: t.navVillages, icon: MapPin },
-    { id: "population", label: t.navPopulation, icon: Users },
+    { id: "villageMap", label: t.pageVillageMap || "Map", icon: Map },
     { id: "funds", label: t.navFunds, icon: Wallet },
     isOfficer 
       ? { id: "admin", label: "Admin", icon: ShieldCheck }

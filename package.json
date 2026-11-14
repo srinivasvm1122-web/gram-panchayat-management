@@ -16,6 +16,7 @@
     "express": "^5.3.0",
     "firebase": "^13.1.0",
     "jspdf": "^4.2.1",
+    "leaflet": "^1.9.4",
     "lucide-react": "^1.66.0",
     "mongoose": "^9.11.4",
     "react": "^19.3.1",

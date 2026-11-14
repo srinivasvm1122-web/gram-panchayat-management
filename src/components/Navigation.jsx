@@ -9,13 +9,15 @@ import {
   FileText, 
   ShieldCheck, 
   Lock, 
-  UserCheck 
+  UserCheck,
+  Map
 } from "lucide-react";
 
 export const Navigation = ({ activeTab, setActiveTab, t, isOfficer, isSuperAdmin, villageCount = 10 }) => {
   const navItems = [
     { id: "home", label: t.navHome, icon: LayoutDashboard, badge: null },
     { id: "villages", label: t.navVillages, icon: MapPin, badge: villageCount },
+    { id: "villageMap", label: t.navVillageMap || "Village Map", icon: Map, badge: "10" },
     { id: "members", label: t.navMembers || "Village People", icon: Users, badge: "300" },
     { id: "population", label: t.navPopulation, icon: Users, badge: "Census" },
     { id: "rations", label: t.navRations, icon: CreditCard, badge: "APL/BPL" },

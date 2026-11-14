@@ -171,6 +171,28 @@ export const VillageDetailModal = ({ village, onClose, t, lang, onPrintVillage }
             </div>
           </div>
 
+          {/* GPS Coordinates & Google Maps link */}
+          <div className="bg-emerald-50/70 rounded-xl border border-emerald-200 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center space-x-2 text-xs text-emerald-900 font-semibold">
+              <MapPin className="w-4 h-4 text-emerald-700 flex-shrink-0" />
+              <span>
+                {village.latitude && village.longitude 
+                  ? `GPS Coordinates: ${Number(village.latitude).toFixed(4)}° N, ${Number(village.longitude).toFixed(4)}° E`
+                  : (lang === "kn" ? "ಸ್ಥಳ ನಿರ್ದೇಶಾಂಕಗಳನ್ನು ಇನ್ನೂ ನಮೂದಿಸಿಲ್ಲ (GPS Not Configured)" : "GPS Location Not Configured")}
+              </span>
+            </div>
+            {village.latitude && village.longitude && (
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${village.latitude},${village.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition text-center"
+              >
+                {lang === "kn" ? "ಗೂಗಲ್ ಮ್ಯಾಪ್ಸ್ ಮಾರ್ಗ" : "Open in Google Maps"}
+              </a>
+            )}
+          </div>
+
           {/* Sarpanch / Elected Member Info & Notes */}
           <div className="p-4 bg-amber-50/70 rounded-xl border border-amber-200/80 space-y-2">
             <div className="flex items-center justify-between text-xs">

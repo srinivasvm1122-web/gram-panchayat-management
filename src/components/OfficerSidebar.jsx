@@ -14,7 +14,8 @@ import {
   LogOut,
   ShieldCheck,
   ChevronRight,
-  BadgeCheck
+  BadgeCheck,
+  Map
 } from "lucide-react";
 
 export const OfficerSidebar = ({ 
@@ -29,16 +30,17 @@ export const OfficerSidebar = ({
   const sidebarItems = [
     { id: "dashboard", label: "1. Dashboard", labelKn: "1. ಡ್ಯಾಶ್‌ಬೋರ್ಡ್", icon: LayoutDashboard, badge: "Overview" },
     { id: "villages", label: "2. Manage Villages", labelKn: "2. ಗ್ರಾಮಗಳ ನಿರ್ವಹಣೆ", icon: MapPin, badge: villageCount },
-    { id: "members", label: "3. Village People & Records", labelKn: "3. ಗ್ರಾಮದ ನಾಗರಿಕರು & ದಾಖಲೆಗಳು", icon: Users, badge: "300" },
-    { id: "population", label: "4. Population Management", labelKn: "4. ಜನಸಂಖ್ಯೆ ನಿರ್ವಹಣೆ", icon: Users, badge: "Demographics" },
-    { id: "families", label: "5. Family Management", labelKn: "5. ಕುಟುಂಬ ನಿರ್ವಹಣೆ", icon: Home, badge: "Housing" },
-    { id: "rations", label: "6. APL/BPL Management", labelKn: "6. APL/BPL ನಿರ್ವಹಣೆ", icon: CreditCard, badge: "PDS" },
-    { id: "elections", label: "7. Election Management", labelKn: "7. ಚುನಾವಣೆ ನಿರ್ವಹಣೆ", icon: Vote, badge: "Results" },
-    { id: "funds", label: "8. Funds Management", labelKn: "8. ನಿಧಿ ನಿರ್ವಹಣೆ", icon: Wallet, badge: "Grants" },
-    { id: "transactions", label: "9. Transactions", labelKn: "9. ವಹಿವಾಟುಗಳು", icon: FileSpreadsheet, badge: "Vouchers" },
-    { id: "reports", label: "10. Reports", labelKn: "10. ವರದಿಗಳು", icon: FileText, badge: "PDF/XLS" },
-    { id: "documents", label: "11. Document Management", labelKn: "11. ಕಡತಗಳ ನಿರ್ವಹಣೆ", icon: FolderArchive, badge: "Orders" },
-    { id: "audit", label: "12. Audit History", labelKn: "12. ಆಡಿಟ್ ಇತಿಹಾಸ", icon: History, badge: "Security" },
+    { id: "villageMap", label: "3. 10 Villages Map", labelKn: "3. ಗ್ರಾಮಗಳ ನಕ್ಷೆ (GIS)", icon: Map, badge: "GPS" },
+    { id: "members", label: "4. Village People & Records", labelKn: "4. ಗ್ರಾಮದ ನಾಗರಿಕರು & ದಾಖಲೆಗಳು", icon: Users, badge: "300" },
+    { id: "population", label: "5. Population Management", labelKn: "5. ಜನಸಂಖ್ಯೆ ನಿರ್ವಹಣೆ", icon: Users, badge: "Demographics" },
+    { id: "families", label: "6. Family Management", labelKn: "6. ಕುಟುಂಬ ನಿರ್ವಹಣೆ", icon: Home, badge: "Housing" },
+    { id: "rations", label: "7. APL/BPL Management", labelKn: "7. APL/BPL ನಿರ್ವಹಣೆ", icon: CreditCard, badge: "PDS" },
+    { id: "elections", label: "8. Election Management", labelKn: "8. ಚುನಾವಣೆ ನಿರ್ವಹಣೆ", icon: Vote, badge: "Results" },
+    { id: "funds", label: "9. Funds Management", labelKn: "9. ನಿಧಿ ನಿರ್ವಹಣೆ", icon: Wallet, badge: "Grants" },
+    { id: "transactions", label: "10. Transactions", labelKn: "10. ವಹಿವಾಟುಗಳು", icon: FileSpreadsheet, badge: "Vouchers" },
+    { id: "reports", label: "11. Reports", labelKn: "11. ವರದಿಗಳು", icon: FileText, badge: "PDF/XLS" },
+    { id: "documents", label: "12. Document Management", labelKn: "12. ಕಡತಗಳ ನಿರ್ವಹಣೆ", icon: FolderArchive, badge: "Orders" },
+    { id: "audit", label: "13. Audit History", labelKn: "13. ಆಡಿಟ್ ಇತಿಹಾಸ", icon: History, badge: "Security" },
     { id: "logout", label: "Logout", labelKn: "ನಿರ್ಗಮಿಸಿ (Logout)", icon: LogOut, isAction: true }
   ];
 

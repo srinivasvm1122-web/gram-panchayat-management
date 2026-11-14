@@ -19,7 +19,9 @@ const villageSchema = new mongoose.Schema({
   votesCast: { type: Number, default: 0 },
   sarpanchName: { type: String, default: "" },
   sarpanchContact: { type: String, default: "" },
-  notes: { type: String, default: "" }
+  notes: { type: String, default: "" },
+  latitude: { type: Number, default: null },
+  longitude: { type: Number, default: null }
 }, { timestamps: true, strict: false });
 
 // 2. Member Model (Village Citizens)
