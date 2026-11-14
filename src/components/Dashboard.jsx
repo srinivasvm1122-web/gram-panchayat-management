@@ -22,7 +22,9 @@ import {
   ChevronRight,
   Edit3,
   Globe,
-  Bot
+  Bot,
+  Mic,
+  Volume2
 } from "lucide-react";
 import { LanguageSelector } from "./LanguageSelector";
 
@@ -346,19 +348,23 @@ export const Dashboard = ({
           </div>
 
           <div>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-wrap items-center gap-1.5">
               <span className="text-[10px] uppercase tracking-wider font-extrabold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/30">
-                AI Village Assistant
+                Voice AI Assistant
               </span>
               <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                 Database Synced (10 Villages)
+              </span>
+              <span className="text-[10px] text-sky-400 font-bold bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20 flex items-center space-x-1">
+                <Mic className="w-2.5 h-2.5" />
+                <span>6 Languages</span>
               </span>
             </div>
             <h3 className="text-base sm:text-lg font-black text-white mt-1">
               {t.chatbotDashboardCardTitle || "AI Gram Panchayat Village Information Assistant"}
             </h3>
             <p className="text-xs text-sky-200 mt-0.5 max-w-xl">
-              {t.chatbotDashboardCardSubtitle || "Ask questions about demographics, voters, rations, and funds for all 10 villages."}
+              {t.chatbotDashboardCardSubtitle || "Ask questions by voice or text about demographics, voters, rations, and funds for all 10 villages."}
             </p>
           </div>
         </div>
@@ -369,7 +375,7 @@ export const Dashboard = ({
             onClick={() => onOpenChatbot && onOpenChatbot()}
             className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:brightness-105 active:scale-95 text-gov-950 font-black text-xs sm:text-sm rounded-xl shadow-lg transition flex items-center justify-center space-x-2"
           >
-            <Sparkles className="w-4 h-4 text-gov-950" />
+            <Mic className="w-4 h-4 text-gov-950" />
             <span>{t.chatbotAskAboutVillage || "Ask AI Chatbot"} &rarr;</span>
           </button>
         </div>

@@ -295,5 +295,13 @@ export const hi = {
   "chatbotOfficerModeBadge": "अधिकृत अधिकारी मोड",
   "chatbotAskAboutVillage": "गाँव के बारे में पूछें",
   "chatbotDashboardCardTitle": "एआई ग्राम पंचायत सूचना चैटबॉट",
-  "chatbotDashboardCardSubtitle": "सभी 10 गाँवों की जनसंख्या, राशन, मतदाता और निधि के बारे में प्रश्न पूछें"
+  "chatbotDashboardCardSubtitle": "सभी 10 गाँवों की जनसंख्या, राशन, मतदाता और निधि के बारे में प्रश्न पूछें",
+  "micListening": "सुन रहा हूँ... अब हिंदी में बोलें",
+  "micProcessing": "आपकी आवाज़ को प्रोसेस किया जा रहा है...",
+  "micPermissionDenied": "माइक्रोफ़ोन अनुमति अस्वीकृत। कृपया ब्राउज़र या ऐप सेटिंग में माइक्रोफ़ोन की अनुमति दें।",
+  "micNotSupported": "इस ब्राउज़र में स्पीच रिकग्निशन समर्थित नहीं है। कृपया Chrome का उपयोग करें।",
+  "micErrorNoSpeech": "कोई आवाज़ नहीं सुनाई दी। कृपया माइक दबाकर दोबारा बोलें।",
+  "speakAnswer": "आवाज़ में सुनें",
+  "stopSpeaking": "आवाज़ बंद करें",
+  "voiceAssistantActive": "वॉइस एआई सक्रिय"
 };

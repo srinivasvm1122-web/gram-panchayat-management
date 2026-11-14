@@ -295,5 +295,13 @@ export const te = {
   "chatbotOfficerModeBadge": "అధికారిక అధికారి ప్రాప్యత",
   "chatbotAskAboutVillage": "గ్రామం గురించి అడగండి",
   "chatbotDashboardCardTitle": "AI గ్రామ పంచాయతీ సమాచార చాట్‌బాట్",
-  "chatbotDashboardCardSubtitle": "10 గ్రామాల జనాభా, రేషన్, ఓటర్లు మరియు నిధుల గురించి ప్రశ్నలు అడగండి"
+  "chatbotDashboardCardSubtitle": "10 గ్రామాల జనాభా, రేషన్, ఓటర్లు మరియు నిధుల గురించి ప్రశ్నలు అడగండి",
+  "micListening": "వింటున్నాను... ఇప్పుడు తెలుగులో మాట్లాడండి",
+  "micProcessing": "మీ వాయిస్ ప్రాసెస్ చేయబడుతోంది...",
+  "micPermissionDenied": "మైక్రోఫోన్ అనుమతి నిరాకరించబడింది. దయచేసి సెట్టింగ్స్‌లో మైక్రోఫోన్ యాక్సెస్‌ని అనుమతించండి.",
+  "micNotSupported": "ఈ బ్రౌజర్‌లో వాయిస్ రికగ్నిషన్ సపోర్ట్ చేయదు. దయచేసి Chrome ఉపయోగించండి.",
+  "micErrorNoSpeech": "ఎటువంటి వాయిస్ రికార్డ్ కాలేదు. దయచేసి మైక్ నొక్కి మళ్ళీ మాట్లాడండి.",
+  "speakAnswer": "వాయిస్‌లో వినండి",
+  "stopSpeaking": "వాయిస్ ఆపండి",
+  "voiceAssistantActive": "వాయిస్ AI సక్రియంగా ఉంది"
 };

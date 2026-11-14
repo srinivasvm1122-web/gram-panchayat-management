@@ -295,5 +295,13 @@ export const en = {
   "chatbotOfficerModeBadge": "Authorized Officer Mode",
   "chatbotAskAboutVillage": "Ask about a village",
   "chatbotDashboardCardTitle": "AI Village Information Chatbot",
-  "chatbotDashboardCardSubtitle": "Ask questions about demographics, voters, rations, and funds for all 10 villages"
+  "chatbotDashboardCardSubtitle": "Ask questions about demographics, voters, rations, and funds for all 10 villages",
+  "micListening": "Listening... Speak now in English",
+  "micProcessing": "Processing your voice query...",
+  "micPermissionDenied": "Microphone permission denied. Please allow microphone access in your browser or Android settings.",
+  "micNotSupported": "Speech recognition is not supported on this browser. Please use Google Chrome or Android WebView.",
+  "micErrorNoSpeech": "No speech detected. Please tap the microphone and speak again.",
+  "speakAnswer": "Read Aloud",
+  "stopSpeaking": "Stop Voice",
+  "voiceAssistantActive": "Voice AI Active"
 };

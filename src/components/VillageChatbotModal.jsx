@@ -20,9 +20,32 @@ import {
   Minimize2,
   ChevronRight,
   Layers,
-  HelpCircle
+  HelpCircle,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  Radio
 } from "lucide-react";
 import { processChatbotQuery } from "../services/chatbotService";
+import {
+  isSpeechRecognitionSupported,
+  isSpeechSynthesisSupported,
+  startListening,
+  stopListening,
+  speakText,
+  stopSpeaking,
+  isSpeaking
+} from "../services/voiceService";
+
+const LANGUAGE_DISPLAY_NAMES = {
+  en: "English",
+  kn: "ಕನ್ನಡ",
+  hi: "हिंदी",
+  ta: "தமிழ்",
+  mr: "मराठी",
+  te: "తెలుగు"
+};
 
 export const VillageChatbotModal = ({
   isOpen = false,
@@ -42,6 +65,15 @@ export const VillageChatbotModal = ({
   const [inputQuery, setInputQuery] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Voice AI States
+  const [isListening, setIsListening] = useState(false);
+  const [interimSpeech, setInterimSpeech] = useState("");
+  const [voiceStatus, setVoiceStatus] = useState("idle"); // "idle" | "listening" | "processing" | "error"
+  const [voiceErrorMessage, setVoiceErrorMessage] = useState("");
+  const [currentlySpeakingId, setCurrentlySpeakingId] = useState(null);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -68,11 +100,131 @@ export const VillageChatbotModal = ({
     }
   }, [messages, isOpen]);
 
-  if (!isOpen) return null;
+  // Clean up any ongoing audio and voice listening when modal closes or unmounts
+  useEffect(() => {
+    return () => {
+      stopListening();
+      stopSpeaking();
+    };
+  }, []);
 
-  const handleSendMessage = (textToSend) => {
+  const handleModalClose = () => {
+    stopListening();
+    stopSpeaking();
+    setIsListening(false);
+    setIsAudioPlaying(false);
+    setCurrentlySpeakingId(null);
+    setInterimSpeech("");
+    setVoiceStatus("idle");
+    if (onClose) onClose();
+  };
+
+  const handleStopSpeaking = () => {
+    stopSpeaking();
+    setCurrentlySpeakingId(null);
+    setIsAudioPlaying(false);
+  };
+
+  const handleToggleSpeakMessage = (msg) => {
+    if (currentlySpeakingId === msg.id) {
+      handleStopSpeaking();
+    } else {
+      handleStopSpeaking();
+      setCurrentlySpeakingId(msg.id);
+      setIsAudioPlaying(true);
+      speakText(msg.text, lang, {
+        onStart: () => {
+          setIsAudioPlaying(true);
+        },
+        onEnd: () => {
+          setCurrentlySpeakingId(null);
+          setIsAudioPlaying(false);
+        },
+        onError: () => {
+          setCurrentlySpeakingId(null);
+          setIsAudioPlaying(false);
+        }
+      });
+    }
+  };
+
+  const toggleVoiceListening = () => {
+    // If audio is playing, stop it first
+    if (isAudioPlaying) {
+      handleStopSpeaking();
+    }
+
+    if (isListening) {
+      stopListening();
+      setIsListening(false);
+      setVoiceStatus("idle");
+      setInterimSpeech("");
+      return;
+    }
+
+    if (!isSpeechRecognitionSupported()) {
+      setVoiceErrorMessage(t.micNotSupported || "Speech recognition is not supported on this device/browser.");
+      return;
+    }
+
+    setVoiceErrorMessage("");
+    setInterimSpeech("");
+    setVoiceStatus("listening");
+    setIsListening(true);
+
+    startListening({
+      lang,
+      onStart: () => {
+        setIsListening(true);
+        setVoiceStatus("listening");
+      },
+      onInterim: (text) => {
+        setInterimSpeech(text);
+      },
+      onResult: (finalTranscript) => {
+        setIsListening(false);
+        setInterimSpeech("");
+        setVoiceStatus("processing");
+        if (finalTranscript && finalTranscript.trim()) {
+          handleSendMessage(finalTranscript.trim(), { autoSpeak: true });
+        } else {
+          setVoiceStatus("idle");
+        }
+      },
+      onError: (errCode, errMsg) => {
+        setIsListening(false);
+        setVoiceStatus("error");
+        setInterimSpeech("");
+        if (errCode === "not-allowed" || errCode === "permission_denied") {
+          setVoiceErrorMessage(t.micPermissionDenied || "Microphone access was denied. Please allow microphone permissions in settings.");
+        } else if (errCode === "no-speech") {
+          setVoiceErrorMessage(t.micErrorNoSpeech || "No speech detected. Please tap mic and speak again.");
+        } else if (errCode === "not_supported") {
+          setVoiceErrorMessage(t.micNotSupported || "Speech recognition is not supported in this browser.");
+        } else {
+          setVoiceErrorMessage(errMsg || "Microphone error occurred. Please try again.");
+        }
+      },
+      onEnd: () => {
+        setIsListening(false);
+        setVoiceStatus(prev => (prev === "listening" ? "idle" : prev));
+      }
+    });
+  };
+
+  const handleSendMessage = (textToSend, options = {}) => {
+    const { autoSpeak = false } = options;
     const query = typeof textToSend === "string" ? textToSend : inputQuery;
     if (!query.trim()) return;
+
+    // Reset voice statuses
+    setVoiceErrorMessage("");
+    setVoiceStatus("idle");
+    setInterimSpeech("");
+
+    if (isAudioPlaying) {
+      handleStopSpeaking();
+    }
 
     const userMessage = {
       id: "user-" + Date.now(),
@@ -98,8 +250,9 @@ export const VillageChatbotModal = ({
         t
       });
 
+      const botMessageId = "bot-" + Date.now();
       const botMessage = {
-        id: "bot-" + Date.now(),
+        id: botMessageId,
         sender: "bot",
         ...response,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -107,10 +260,28 @@ export const VillageChatbotModal = ({
 
       setMessages(prev => [...prev, botMessage]);
       setIsTyping(false);
+
+      // Auto-speak response if query was input by voice
+      if (autoSpeak && botMessage.text) {
+        setCurrentlySpeakingId(botMessageId);
+        setIsAudioPlaying(true);
+        speakText(botMessage.text, lang, {
+          onStart: () => setIsAudioPlaying(true),
+          onEnd: () => {
+            setCurrentlySpeakingId(null);
+            setIsAudioPlaying(false);
+          },
+          onError: () => {
+            setCurrentlySpeakingId(null);
+            setIsAudioPlaying(false);
+          }
+        });
+      }
     }, 400);
   };
 
   const handleClearChat = () => {
+    handleStopSpeaking();
     setMessages([
       {
         id: "welcome-reset-" + Date.now(),
@@ -134,6 +305,8 @@ export const VillageChatbotModal = ({
     { label: "Someshwara", query: "Someshwara" },
     { label: "Kempegowda Nagar", query: "Kempegowda Nagar" }
   ];
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-150">
@@ -170,17 +343,33 @@ export const VillageChatbotModal = ({
                   {t.chatbotTitle || "AI Gram Panchayat Assistant"}
                 </h3>
                 <span className="text-[9px] bg-amber-400 text-gov-950 font-black px-1.5 py-0.2 rounded uppercase">
-                  AI 2.0
+                  Voice AI
+                </span>
+                <span className="text-[9px] bg-emerald-500/20 text-emerald-300 font-bold px-1.5 py-0.2 rounded border border-emerald-400/30">
+                  {LANGUAGE_DISPLAY_NAMES[lang] || lang.toUpperCase()}
                 </span>
               </div>
-              <p className="text-[11px] text-sky-200/90 truncate max-w-[240px] sm:max-w-xs">
+              <p className="text-[11px] text-sky-200/90 truncate max-w-[220px] sm:max-w-xs">
                 {t.chatbotSubtitle || "Instant village demographics, rations, voters & funds"}
               </p>
             </div>
           </div>
 
-          {/* Action Buttons: Expand, Clear, Close */}
+          {/* Action Buttons: Stop Voice, Clear, Expand, Close */}
           <div className="flex items-center space-x-1 sm:space-x-1.5">
+            {/* Global Stop Voice Button (Active when TTS is reading) */}
+            {isAudioPlaying && (
+              <button
+                type="button"
+                onClick={handleStopSpeaking}
+                className="px-2 py-1 rounded-lg bg-red-500/25 border border-red-400/50 text-red-200 hover:bg-red-500/40 transition text-xs flex items-center space-x-1 animate-pulse"
+                title={t.stopSpeaking || "Stop Voice"}
+              >
+                <VolumeX className="w-3.5 h-3.5 text-red-300" />
+                <span className="text-[11px] font-bold">{t.stopSpeaking || "Stop"}</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={handleClearChat}
@@ -201,7 +390,7 @@ export const VillageChatbotModal = ({
 
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleModalClose}
               className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-red-500/20 transition"
               title="Close Chatbot"
             >
@@ -227,6 +416,7 @@ export const VillageChatbotModal = ({
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 bg-slate-50/60 scrollbar-thin">
           {messages.map((msg) => {
             const isUser = msg.sender === "user";
+            const isMsgSpeaking = currentlySpeakingId === msg.id;
 
             return (
               <div 
@@ -243,14 +433,38 @@ export const VillageChatbotModal = ({
                       : "bg-white border border-slate-200/90 text-slate-800 rounded-bl-xs"
                   }`}
                 >
-                  {/* Sender label */}
+                  {/* Sender label and Speaker button */}
                   {!isUser && (
                     <div className="flex items-center space-x-1.5 mb-1.5 pb-1 border-b border-slate-100">
                       <Bot className="w-3.5 h-3.5 text-amber-500" />
-                      <span className="font-extrabold text-[11px] text-slate-500">
+                      <span className="font-extrabold text-[11px] text-slate-600">
                         {t.chatbotTitle || "GP Assistant"}
                       </span>
                       <span className="text-[10px] text-slate-400 ml-auto">{msg.timestamp}</span>
+
+                      {/* Speaker Read Aloud Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleToggleSpeakMessage(msg)}
+                        className={`p-1 px-2 rounded-lg transition text-xs flex items-center space-x-1 ml-1.5 ${
+                          isMsgSpeaking
+                            ? "bg-red-100 text-red-700 hover:bg-red-200 font-bold border border-red-300 animate-pulse"
+                            : "bg-slate-100 text-slate-600 hover:bg-amber-100 hover:text-amber-900 border border-slate-200"
+                        }`}
+                        title={isMsgSpeaking ? (t.stopSpeaking || "Stop Voice") : (t.speakAnswer || "Read Aloud")}
+                      >
+                        {isMsgSpeaking ? (
+                          <>
+                            <VolumeX className="w-3.5 h-3.5 text-red-600" />
+                            <span className="text-[10px]">{t.stopSpeaking || "Stop"}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Volume2 className="w-3.5 h-3.5 text-slate-600" />
+                            <span className="text-[10px]">{t.speakAnswer || "Speak"}</span>
+                          </>
+                        )}
+                      </button>
                     </div>
                   )}
 
@@ -347,7 +561,7 @@ export const VillageChatbotModal = ({
                           type="button"
                           onClick={() => {
                             if (onNavigateToMap) onNavigateToMap(msg.village);
-                            onClose();
+                            handleModalClose();
                           }}
                           className="px-2.5 py-1.5 rounded-lg bg-gov-900 hover:bg-gov-800 text-white font-bold text-[11px] transition flex items-center space-x-1 shadow-sm"
                         >
@@ -371,7 +585,7 @@ export const VillageChatbotModal = ({
                           type="button"
                           onClick={() => {
                             if (onSelectVillageForDetails) onSelectVillageForDetails(msg.village);
-                            onClose();
+                            handleModalClose();
                           }}
                           className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] transition flex items-center space-x-1 border border-slate-300"
                         >
@@ -483,6 +697,63 @@ export const VillageChatbotModal = ({
           </button>
         </div>
 
+        {/* Voice AI Listening Banner with Audio Waves */}
+        {isListening && (
+          <div className="px-4 py-2.5 bg-gradient-to-r from-red-500/10 via-amber-500/15 to-red-500/10 border-t border-amber-300 flex items-center justify-between animate-in fade-in duration-150 flex-shrink-0">
+            <div className="flex items-center space-x-2.5 min-w-0">
+              <span className="relative flex h-3 w-3 flex-shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+              </span>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-slate-900 truncate">
+                  {interimSpeech ? (
+                    <span className="italic text-gov-900">"{interimSpeech}"</span>
+                  ) : (
+                    <span>{t.micListening || `Listening... Speak in ${LANGUAGE_DISPLAY_NAMES[lang] || 'your language'}`}</span>
+                  )}
+                </p>
+                <p className="text-[10px] text-slate-500">
+                  {t.voiceAssistantActive || "Voice AI Active"} ({LANGUAGE_DISPLAY_NAMES[lang] || lang.toUpperCase()})
+                </p>
+              </div>
+            </div>
+
+            {/* Audio waveform bouncing bars */}
+            <div className="flex items-center space-x-1 flex-shrink-0 ml-2">
+              <span className="w-1 h-3.5 bg-red-500 rounded-full animate-bounce [animation-delay:0ms]"></span>
+              <span className="w-1 h-5 bg-amber-500 rounded-full animate-bounce [animation-delay:150ms]"></span>
+              <span className="w-1 h-4 bg-red-600 rounded-full animate-bounce [animation-delay:300ms]"></span>
+              <span className="w-1 h-2.5 bg-amber-600 rounded-full animate-bounce [animation-delay:450ms]"></span>
+            </div>
+          </div>
+        )}
+
+        {/* Voice Processing Status */}
+        {voiceStatus === "processing" && (
+          <div className="px-4 py-2 bg-amber-50 border-t border-amber-200 text-xs font-medium text-amber-900 flex items-center space-x-2 animate-pulse flex-shrink-0">
+            <Sparkles className="w-3.5 h-3.5 text-amber-600 animate-spin" />
+            <span>{t.micProcessing || "Processing your voice query..."}</span>
+          </div>
+        )}
+
+        {/* Voice Error Notice */}
+        {voiceErrorMessage && (
+          <div className="px-4 py-2 bg-red-50 border-t border-red-200 text-xs text-red-800 flex items-center justify-between flex-shrink-0">
+            <div className="flex items-center space-x-1.5 truncate">
+              <AlertTriangle className="w-3.5 h-3.5 text-red-600 flex-shrink-0" />
+              <span className="truncate">{voiceErrorMessage}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setVoiceErrorMessage("")}
+              className="text-red-500 hover:text-red-700 ml-2 font-black text-sm"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {/* Query Input Bar */}
         <form 
           onSubmit={(e) => {
@@ -496,14 +767,37 @@ export const VillageChatbotModal = ({
             type="text"
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
-            placeholder={t.chatbotPlaceholder || "Type a village name (e.g. Shivapura, Ward 2, Funds)..."}
+            placeholder={
+              isListening
+                ? (t.micListening || `Listening in ${LANGUAGE_DISPLAY_NAMES[lang]}...`)
+                : (t.chatbotPlaceholder || "Type or tap mic to speak (e.g. Shivapura, Funds)...")
+            }
             className="flex-1 px-4 py-2.5 rounded-2xl border border-slate-300 text-xs sm:text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-gov-500 focus:border-gov-500 transition shadow-inner"
           />
 
+          {/* Voice Microphone Button */}
+          <button
+            type="button"
+            onClick={toggleVoiceListening}
+            className={`p-2.5 rounded-2xl font-bold transition flex items-center justify-center flex-shrink-0 shadow-md ${
+              isListening
+                ? "bg-red-600 text-white animate-pulse ring-4 ring-red-400/40"
+                : "bg-amber-500 hover:bg-amber-600 text-gov-950 active:scale-95"
+            }`}
+            title={isListening ? (t.stopSpeaking || "Stop Listening") : (t.micListening || `Speak question in ${LANGUAGE_DISPLAY_NAMES[lang]}`)}
+          >
+            {isListening ? (
+              <MicOff className="w-4 h-4 text-white" />
+            ) : (
+              <Mic className="w-4 h-4 text-gov-950" />
+            )}
+          </button>
+
+          {/* Send Button */}
           <button
             type="submit"
-            disabled={!inputQuery.trim() || isTyping}
-            className="px-4 py-2.5 bg-gov-900 hover:bg-gov-800 disabled:opacity-50 text-white rounded-2xl font-bold text-xs sm:text-sm shadow-md transition flex items-center space-x-1.5 flex-shrink-0"
+            disabled={!inputQuery.trim() || isTyping || isListening}
+            className="px-4 py-2.5 bg-gov-900 hover:bg-gov-800 disabled:opacity-50 text-white rounded-2xl font-bold text-xs sm:text-sm shadow-md transition flex items-center space-x-1.5 flex-shrink-0 active:scale-95"
           >
             <span>{t.chatbotSend || "Send"}</span>
             <Send className="w-3.5 h-3.5 text-amber-400" />
