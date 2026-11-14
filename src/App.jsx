@@ -21,6 +21,7 @@ import { FamilyManagement } from "./components/FamilyManagement";
 import { DocumentManagement } from "./components/DocumentManagement";
 import { VillageMap } from "./components/VillageMap";
 import { FirstTimeLanguageModal } from "./components/FirstTimeLanguageModal";
+import { VillageChatbotModal } from "./components/VillageChatbotModal";
 import { updateVillageInDb } from "./services/apiService";
 
 import { translations } from "./data/translations";
@@ -46,7 +47,7 @@ import {
   initialFamilies
 } from "./data/initialData";
 import { initialMembers } from "./data/memberData";
-import { ShieldCheck, Lock, UserCheck, Database, History, Download, RefreshCw } from "lucide-react";
+import { ShieldCheck, Lock, UserCheck, Database, History, Download, RefreshCw, Bot, Sparkles } from "lucide-react";
 
 export default function App() {
   // Load state from local storage or fallback
@@ -73,6 +74,7 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedVillageForDetails, setSelectedVillageForDetails] = useState(null);
   const [isFirebaseModalOpen, setIsFirebaseModalOpen] = useState(false);
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [isFirstTimeModalOpen, setIsFirstTimeModalOpen] = useState(() => !localStorage.getItem("gp_language_chosen"));
   const [notification, setNotification] = useState(null);
 
@@ -600,6 +602,7 @@ export default function App() {
                 onExportPdf={() => handleExportPdf("master")}
                 onExportExcel={handleExportExcel}
                 onOpenEditDashboard={() => setIsEditDashboardModalOpen(true)}
+                onOpenChatbot={() => setIsChatbotOpen(true)}
               />
             )}
 
@@ -924,6 +927,63 @@ export default function App() {
         t={t}
         lang={lang}
       />
+
+      {/* AI Gram Panchayat Village Information Assistant Modal */}
+      <VillageChatbotModal
+        isOpen={isChatbotOpen}
+        onClose={() => setIsChatbotOpen(false)}
+        villages={villages}
+        funds={funds}
+        transactions={transactions}
+        electionData={electionData}
+        isOfficer={isOfficer}
+        currentUser={currentUser}
+        lang={lang}
+        t={t}
+        onNavigateToMap={(v) => {
+          setActiveTab("villageMap");
+        }}
+        onSelectVillageForDetails={(v) => {
+          setSelectedVillageForDetails(v);
+        }}
+      />
+
+      {/* Floating AI Chatbot Launcher Button */}
+      {!isChatbotOpen && (
+        <button
+          type="button"
+          onClick={() => setIsChatbotOpen(true)}
+          className="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 z-40 bg-gradient-to-r from-gov-950 via-gov-900 to-indigo-950 text-white pl-3.5 pr-4 py-2.5 rounded-full shadow-2xl border-2 border-amber-400 hover:scale-105 active:scale-95 transition-all flex items-center space-x-2.5 group hover:shadow-amber-500/20"
+          title="Open AI Village Information Assistant"
+        >
+          <div className="relative">
+            <div className="w-8 h-8 rounded-full bg-amber-400 text-gov-950 flex items-center justify-center font-bold shadow">
+              <Bot className="w-5 h-5 text-gov-950" />
+            </div>
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 border border-gov-900 rounded-full animate-ping"></span>
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 border border-gov-900 rounded-full"></span>
+          </div>
+
+          <div className="text-left hidden xs:block">
+            <div className="text-xs font-black text-amber-300 leading-none">
+              {lang === "kn" 
+                ? "AI ಗ್ರಾಮ ಸಹಾಯಕ" 
+                : lang === "hi" 
+                ? "एआई ग्राम सहायक" 
+                : lang === "ta" 
+                ? "AI கிராம உதவியாளர்" 
+                : lang === "mr" 
+                ? "एआय गाव सहाय्यक" 
+                : lang === "te" 
+                ? "AI గ్రామ సహాయకుడు" 
+                : "AI Village Assistant"}
+            </div>
+            <div className="text-[9px] text-slate-300 font-semibold leading-tight mt-0.5">
+              {lang === "kn" ? "ಪ್ರಶ್ನೆ ಕೇಳಿ" : "Ask about 10 Villages"}
+            </div>
+          </div>
+        </button>
+      )}
 
     </div>
   );

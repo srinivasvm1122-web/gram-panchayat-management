@@ -21,7 +21,8 @@ import {
   ShieldCheck,
   ChevronRight,
   Edit3,
-  Globe
+  Globe,
+  Bot
 } from "lucide-react";
 import { LanguageSelector } from "./LanguageSelector";
 
@@ -42,7 +43,8 @@ export const Dashboard = ({
   setIsAddTransactionModalOpen,
   onExportPdf,
   onExportExcel,
-  onOpenEditDashboard
+  onOpenEditDashboard,
+  onOpenChatbot
 }) => {
   // Format currency in Indian numbering format
   const formatINR = (val = 0) => {
@@ -248,6 +250,15 @@ export const Dashboard = ({
           )}
 
           <button
+            onClick={() => onOpenChatbot && onOpenChatbot()}
+            className="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gov-950 rounded-xl text-xs sm:text-sm font-black shadow-md hover:shadow-lg transition flex items-center space-x-1.5"
+            title="Open AI Village Information Chatbot"
+          >
+            <Bot className="w-4 h-4 text-gov-950" />
+            <span>{t.chatbotTitle || "AI Assistant"}</span>
+          </button>
+
+          <button
             onClick={onExportPdf}
             className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs sm:text-sm font-semibold border border-slate-300 transition flex items-center space-x-1.5"
           >
@@ -320,6 +331,48 @@ export const Dashboard = ({
           onSelectLanguage={setLang} 
           variant="grid" 
         />
+      </div>
+
+      {/* AI Village Information Chatbot Banner */}
+      <div className="bg-gradient-to-r from-gov-950 via-gov-900 to-slate-900 rounded-2xl p-4 sm:p-5 text-white border border-amber-500/40 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center space-x-3.5">
+          <div className="relative flex-shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 p-0.5 shadow-md flex items-center justify-center">
+              <div className="w-full h-full bg-gov-950 rounded-[14px] flex items-center justify-center">
+                <Bot className="w-6 h-6 text-amber-400" />
+              </div>
+            </div>
+            <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-gov-950 rounded-full animate-pulse" title="AI Ready"></span>
+          </div>
+
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="text-[10px] uppercase tracking-wider font-extrabold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/30">
+                AI Village Assistant
+              </span>
+              <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                Database Synced (10 Villages)
+              </span>
+            </div>
+            <h3 className="text-base sm:text-lg font-black text-white mt-1">
+              {t.chatbotDashboardCardTitle || "AI Gram Panchayat Village Information Assistant"}
+            </h3>
+            <p className="text-xs text-sky-200 mt-0.5 max-w-xl">
+              {t.chatbotDashboardCardSubtitle || "Ask questions about demographics, voters, rations, and funds for all 10 villages."}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            type="button"
+            onClick={() => onOpenChatbot && onOpenChatbot()}
+            className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:brightness-105 active:scale-95 text-gov-950 font-black text-xs sm:text-sm rounded-xl shadow-lg transition flex items-center justify-center space-x-2"
+          >
+            <Sparkles className="w-4 h-4 text-gov-950" />
+            <span>{t.chatbotAskAboutVillage || "Ask AI Chatbot"} &rarr;</span>
+          </button>
+        </div>
       </div>
 
       {/* Primary KPI Grid (Requirement 2 - 11 Metrics) */}

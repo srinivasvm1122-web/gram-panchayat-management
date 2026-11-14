@@ -278,5 +278,22 @@ export const en = {
   "languageSettingSubtitle": "Choose your preferred language across web portal and Android mobile app.",
   "firstTimeLanguageTitle": "Welcome to Gram Panchayat Digital Portal",
   "firstTimeLanguageSubtitle": "Please select your preferred language to proceed. You can change it anytime in settings or the dashboard header.",
-  "navLanguage": "Language"
+  "navLanguage": "Language",
+  "chatbotTitle": "AI Gram Panchayat Assistant",
+  "chatbotSubtitle": "Instant village demographic, voter, ration & public funds intelligence",
+  "chatbotPlaceholder": "Type a village name (e.g. Shivapura, Ward 3, Funds)...",
+  "chatbotSend": "Send",
+  "chatbotClear": "Clear Chat",
+  "chatbotWelcome": "Namaskara! I am your official Gram Panchayat AI Assistant. You can ask me about any of the 10 registered villages, population demographics, APL/BPL ration cards, registered voters, or public development funds.",
+  "chatbotPrivacyWarning": "Privacy Protection Notice: Under Karnataka E-Governance & Data Protection rules, individual citizen names, personal phone numbers, caste categories, medical records, and officer security credentials are strictly confidential and cannot be disclosed.",
+  "chatbotVillageNotFound": "Could not find a village matching your query. Please check the spelling or select from our 10 registered Gram Panchayat villages below:",
+  "chatbotQuickSuggestions": "Suggested Queries",
+  "chatbotViewOnMap": "View on Map",
+  "chatbotDirections": "Google Maps Directions",
+  "chatbotViewDetails": "Full Village Details",
+  "chatbotFundsOverview": "Public Funds & Development Works",
+  "chatbotOfficerModeBadge": "Authorized Officer Mode",
+  "chatbotAskAboutVillage": "Ask about a village",
+  "chatbotDashboardCardTitle": "AI Village Information Chatbot",
+  "chatbotDashboardCardSubtitle": "Ask questions about demographics, voters, rations, and funds for all 10 villages"
 };

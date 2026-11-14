@@ -1,0 +1,518 @@
+import React, { useState, useRef, useEffect } from "react";
+import { 
+  Bot, 
+  Send, 
+  X, 
+  RotateCcw, 
+  Building2, 
+  Users, 
+  MapPin, 
+  Navigation as NavIcon, 
+  ExternalLink, 
+  ShieldCheck, 
+  AlertTriangle, 
+  Eye, 
+  Wallet, 
+  CreditCard, 
+  Vote, 
+  Sparkles, 
+  Maximize2, 
+  Minimize2,
+  ChevronRight,
+  Layers,
+  HelpCircle
+} from "lucide-react";
+import { processChatbotQuery } from "../services/chatbotService";
+
+export const VillageChatbotModal = ({
+  isOpen = false,
+  onClose,
+  villages = [],
+  funds = {},
+  transactions = [],
+  electionData = {},
+  isOfficer = false,
+  currentUser = {},
+  lang = "en",
+  t = {},
+  onNavigateToMap,
+  onSelectVillageForDetails
+}) => {
+  const [messages, setMessages] = useState([]);
+  const [inputQuery, setInputQuery] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Initialize greeting on first open or language switch
+  useEffect(() => {
+    if (messages.length === 0) {
+      setMessages([
+        {
+          id: "welcome-1",
+          sender: "bot",
+          text: t.chatbotWelcome || "Namaskara! I am your official Gram Panchayat AI Assistant. You can ask me about any of the 10 registered villages, population demographics, APL/BPL ration cards, registered voters, or public development funds.",
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          suggestions: ["Shivapura", "Doddakallahalli", "Malleshwara", "Funds", "Total Population"]
+        }
+      ]);
+    }
+  }, [lang, t]);
+
+  // Auto-scroll to bottom of message thread
+  useEffect(() => {
+    if (isOpen) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      setTimeout(() => inputRef.current?.focus(), 150);
+    }
+  }, [messages, isOpen]);
+
+  if (!isOpen) return null;
+
+  const handleSendMessage = (textToSend) => {
+    const query = typeof textToSend === "string" ? textToSend : inputQuery;
+    if (!query.trim()) return;
+
+    const userMessage = {
+      id: "user-" + Date.now(),
+      sender: "user",
+      text: query,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputQuery("");
+    setIsTyping(true);
+
+    // Simulate natural AI thinking delay
+    setTimeout(() => {
+      const response = processChatbotQuery({
+        query,
+        lang,
+        villages,
+        funds,
+        transactions,
+        electionData,
+        isOfficer,
+        t
+      });
+
+      const botMessage = {
+        id: "bot-" + Date.now(),
+        sender: "bot",
+        ...response,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      setMessages(prev => [...prev, botMessage]);
+      setIsTyping(false);
+    }, 400);
+  };
+
+  const handleClearChat = () => {
+    setMessages([
+      {
+        id: "welcome-reset-" + Date.now(),
+        sender: "bot",
+        text: t.chatbotWelcome || "Chat cleared. Ask about any of the 10 villages, population, ration cards, or funds.",
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        suggestions: ["Shivapura", "Doddakallahalli", "Ward 4", "Funds"]
+      }
+    ]);
+  };
+
+  const quickPills = [
+    { label: "Shivapura", query: "Shivapura" },
+    { label: "Doddakallahalli", query: "Doddakallahalli" },
+    { label: "Malleshwara", query: "Malleshwara" },
+    { label: "Ramanagara", query: "Ramanagara" },
+    { label: "Gandhinagar", query: "Gandhinagar" },
+    { label: "Krishnarajapura", query: "Krishnarajapura" },
+    { label: "Nelamangala", query: "Nelamangala" },
+    { label: "Devanahalli", query: "Devanahalli" },
+    { label: "Someshwara", query: "Someshwara" },
+    { label: "Kempegowda Nagar", query: "Kempegowda Nagar" }
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-150">
+      <div 
+        className={`bg-white w-full shadow-2xl flex flex-col border border-amber-500/30 overflow-hidden transition-all duration-200 ${
+          isExpanded 
+            ? "sm:max-w-4xl h-[94vh] rounded-3xl" 
+            : "sm:max-w-xl h-[88vh] sm:h-[680px] rounded-t-3xl sm:rounded-3xl"
+        }`}
+      >
+        
+        {/* Tricolor Header Accent */}
+        <div className="h-1.5 w-full flex flex-shrink-0">
+          <div className="w-1/3 bg-[#FF9933]"></div>
+          <div className="w-1/3 bg-white"></div>
+          <div className="w-1/3 bg-[#138808]"></div>
+        </div>
+
+        {/* Chatbot Top Bar */}
+        <div className="p-4 bg-gradient-to-r from-gov-950 via-gov-900 to-gov-800 text-white flex items-center justify-between border-b border-amber-500/30 flex-shrink-0">
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 p-0.5 shadow flex items-center justify-center">
+                <div className="w-full h-full bg-gov-950 rounded-[14px] flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-amber-400" />
+                </div>
+              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-gov-950 rounded-full" title="Online"></span>
+            </div>
+
+            <div>
+              <div className="flex items-center space-x-1.5">
+                <h3 className="font-extrabold text-sm sm:text-base text-white leading-tight">
+                  {t.chatbotTitle || "AI Gram Panchayat Assistant"}
+                </h3>
+                <span className="text-[9px] bg-amber-400 text-gov-950 font-black px-1.5 py-0.2 rounded uppercase">
+                  AI 2.0
+                </span>
+              </div>
+              <p className="text-[11px] text-sky-200/90 truncate max-w-[240px] sm:max-w-xs">
+                {t.chatbotSubtitle || "Instant village demographics, rations, voters & funds"}
+              </p>
+            </div>
+          </div>
+
+          {/* Action Buttons: Expand, Clear, Close */}
+          <div className="flex items-center space-x-1 sm:space-x-1.5">
+            <button
+              type="button"
+              onClick={handleClearChat}
+              className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-gov-800 transition text-xs"
+              title={t.chatbotClear || "Clear chat history"}
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="hidden sm:inline-flex p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-gov-800 transition"
+              title={isExpanded ? "Collapse" : "Expand"}
+            >
+              {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-red-500/20 transition"
+              title="Close Chatbot"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Officer Status Sub-banner */}
+        {isOfficer && (
+          <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-1.5 text-[11px] font-bold text-amber-900 flex items-center justify-between">
+            <div className="flex items-center space-x-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+              <span>{t.chatbotOfficerModeBadge || "Authorized Officer Access"} ({currentUser?.name || "Officer"})</span>
+            </div>
+            <span className="text-[10px] bg-amber-400 text-gov-950 px-2 py-0.2 rounded font-black uppercase">
+              Full Query Access
+            </span>
+          </div>
+        )}
+
+        {/* Message Thread Body */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 bg-slate-50/60 scrollbar-thin">
+          {messages.map((msg) => {
+            const isUser = msg.sender === "user";
+
+            return (
+              <div 
+                key={msg.id} 
+                className={`flex flex-col ${isUser ? "items-end" : "items-start"} animate-in fade-in duration-150`}
+              >
+                {/* Bubble */}
+                <div 
+                  className={`max-w-[88%] sm:max-w-[82%] rounded-2xl p-3.5 shadow-sm text-xs sm:text-sm leading-relaxed ${
+                    isUser
+                      ? "bg-gov-900 text-white rounded-br-xs font-medium"
+                      : msg.type === "privacy_warning"
+                      ? "bg-red-50 border border-red-200 text-red-900 rounded-bl-xs"
+                      : "bg-white border border-slate-200/90 text-slate-800 rounded-bl-xs"
+                  }`}
+                >
+                  {/* Sender label */}
+                  {!isUser && (
+                    <div className="flex items-center space-x-1.5 mb-1.5 pb-1 border-b border-slate-100">
+                      <Bot className="w-3.5 h-3.5 text-amber-500" />
+                      <span className="font-extrabold text-[11px] text-slate-500">
+                        {t.chatbotTitle || "GP Assistant"}
+                      </span>
+                      <span className="text-[10px] text-slate-400 ml-auto">{msg.timestamp}</span>
+                    </div>
+                  )}
+
+                  {/* Main text message */}
+                  <p className="whitespace-pre-line">{msg.text}</p>
+
+                  {/* CASE 1: STRUCTURED VILLAGE DETAILS CARD */}
+                  {msg.type === "village_details" && msg.village && (
+                    <div className="mt-3 pt-3 border-t border-slate-100 space-y-2.5">
+                      
+                      {/* Demographics KPI Pill Grid */}
+                      <div className="grid grid-cols-2 gap-2 text-[11px]">
+                        <div className="bg-slate-50 p-2 rounded-xl border border-slate-200">
+                          <span className="text-slate-500 block text-[10px] uppercase font-bold">{t.totalPopulation || "Population"}</span>
+                          <strong className="text-slate-900 text-xs font-black">
+                            {(Number(msg.village.totalPopulation) || 0).toLocaleString()}
+                          </strong>
+                          <span className="text-[10px] text-slate-500 block">
+                            {msg.village.maleMembers} M • {msg.village.femaleMembers} F
+                          </span>
+                        </div>
+
+                        <div className="bg-cyan-50 p-2 rounded-xl border border-cyan-100">
+                          <span className="text-cyan-800 block text-[10px] uppercase font-bold">{t.totalFamilies || "Families & Rations"}</span>
+                          <strong className="text-cyan-950 text-xs font-black">
+                            {msg.village.totalFamilies} Families
+                          </strong>
+                          <span className="text-[10px] text-cyan-700 block">
+                            BPL: {msg.village.bplCardCount} • APL: {msg.village.aplCardCount}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Voter Turnout Bar */}
+                      <div className="bg-purple-50 p-2.5 rounded-xl border border-purple-100 text-[11px]">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="font-bold text-purple-900 flex items-center space-x-1">
+                            <Vote className="w-3.5 h-3.5 text-purple-700" />
+                            <span>{t.votingTurnout || "Turnout"}: {msg.turnout}%</span>
+                          </span>
+                          <span className="text-[10px] text-purple-800 font-semibold">
+                            {msg.village.votesCast} / {msg.village.totalVoters} Voters
+                          </span>
+                        </div>
+                        <div className="w-full bg-purple-200/80 rounded-full h-1.5 overflow-hidden">
+                          <div 
+                            className="bg-purple-700 h-1.5 rounded-full" 
+                            style={{ width: `${Math.min(100, Number(msg.turnout))}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {/* GPS Location Snippet */}
+                      <div className={`p-2 rounded-xl border flex items-center justify-between text-[11px] ${
+                        msg.hasGps 
+                          ? "bg-emerald-50 border-emerald-200 text-emerald-900" 
+                          : "bg-slate-100 border-slate-200 text-slate-600"
+                      }`}>
+                        <div className="flex items-center space-x-1.5 truncate">
+                          <MapPin className={`w-3.5 h-3.5 flex-shrink-0 ${msg.hasGps ? "text-emerald-600" : "text-slate-400"}`} />
+                          <span className="truncate font-semibold">
+                            {msg.hasGps 
+                              ? `GPS: ${Number(msg.village.latitude).toFixed(4)}° N, ${Number(msg.village.longitude).toFixed(4)}° E`
+                              : (t.mapLocationNotConfigured || "GPS Location Not Configured")}
+                          </span>
+                        </div>
+                        <span className={`text-[9px] font-black px-1.5 py-0.2 rounded uppercase ${
+                          msg.hasGps ? "bg-emerald-200 text-emerald-900" : "bg-slate-200 text-slate-700"
+                        }`}>
+                          {msg.hasGps ? "Mapped" : "Pending"}
+                        </span>
+                      </div>
+
+                      {/* Recent Public Development Works */}
+                      {msg.developmentWorks && msg.developmentWorks.length > 0 && (
+                        <div className="p-2.5 bg-amber-50 rounded-xl border border-amber-200/80 text-[11px] space-y-1">
+                          <span className="font-extrabold text-amber-900 flex items-center space-x-1">
+                            <Layers className="w-3.5 h-3.5 text-amber-700" />
+                            <span>{t.developmentFunds || "Public Development Works"}:</span>
+                          </span>
+                          <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-amber-950">
+                            {msg.developmentWorks.slice(0, 2).map((work, idx) => (
+                              <li key={idx} className="truncate">
+                                {work.purpose} (₹ {Number(work.amount || 0).toLocaleString("en-IN")})
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Action Buttons for Village */}
+                      <div className="pt-2 flex flex-wrap gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (onNavigateToMap) onNavigateToMap(msg.village);
+                            onClose();
+                          }}
+                          className="px-2.5 py-1.5 rounded-lg bg-gov-900 hover:bg-gov-800 text-white font-bold text-[11px] transition flex items-center space-x-1 shadow-sm"
+                        >
+                          <MapPin className="w-3 h-3 text-amber-400" />
+                          <span>{t.chatbotViewOnMap || "View on Map"}</span>
+                        </button>
+
+                        {msg.hasGps && (
+                          <a
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${msg.village.latitude},${msg.village.longitude}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] transition flex items-center space-x-1 shadow-sm"
+                          >
+                            <NavIcon className="w-3 h-3" />
+                            <span>{t.chatbotDirections || "Google Maps"}</span>
+                          </a>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (onSelectVillageForDetails) onSelectVillageForDetails(msg.village);
+                            onClose();
+                          }}
+                          className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] transition flex items-center space-x-1 border border-slate-300"
+                        >
+                          <Eye className="w-3 h-3 text-slate-600" />
+                          <span>{t.chatbotViewDetails || "Details"}</span>
+                        </button>
+                      </div>
+
+                    </div>
+                  )}
+
+                  {/* CASE 2: VILLAGE NOT FOUND FALLBACK SUGGESTION PILLS */}
+                  {msg.type === "not_found" && msg.suggestedVillages && (
+                    <div className="mt-3 pt-2.5 border-t border-amber-200/60">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-2">
+                        {t.chatbotQuickSuggestions || "Click a village to view official details:"}
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {msg.suggestedVillages.map((v) => (
+                          <button
+                            key={v.id}
+                            type="button"
+                            onClick={() => handleSendMessage(v.nameEn)}
+                            className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-gov-950 font-bold text-xs border border-amber-300 transition shadow-xs flex items-center space-x-1"
+                          >
+                            <span>{v.nameEn}</span>
+                            <span className="text-[10px] text-amber-700">({v.nameKn})</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* CASE 3: ALL VILLAGES LIST INTENT */}
+                  {msg.type === "all_villages" && msg.villagesList && (
+                    <div className="mt-3 pt-2.5 border-t border-slate-100">
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {msg.villagesList.map((v) => (
+                          <button
+                            key={v.id}
+                            type="button"
+                            onClick={() => handleSendMessage(v.nameEn)}
+                            className="p-2 rounded-xl bg-slate-50 hover:bg-amber-50 border border-slate-200 hover:border-amber-300 text-left transition flex items-center justify-between group"
+                          >
+                            <div>
+                              <div className="font-bold text-slate-900 text-xs group-hover:text-gov-900">
+                                {v.nameEn}
+                              </div>
+                              <div className="text-[10px] text-slate-500">
+                                {v.nameKn} • Ward {v.wardNo}
+                              </div>
+                            </div>
+                            <ChevronRight className="w-3 h-3 text-slate-400 group-hover:text-gov-900 group-hover:translate-x-0.5 transition-transform" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+
+                {isUser && (
+                  <span className="text-[10px] text-slate-400 mt-0.5 mr-1">{msg.timestamp}</span>
+                )}
+              </div>
+            );
+          })}
+
+          {/* Typing Indicator */}
+          {isTyping && (
+            <div className="flex items-center space-x-2 text-xs text-slate-500 bg-white p-3 rounded-2xl w-max border border-slate-200 animate-pulse">
+              <Bot className="w-4 h-4 text-amber-500 animate-spin" />
+              <span>Searching Gram Panchayat database...</span>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Quick Suggestion Pills Bar */}
+        <div className="px-4 py-2 bg-slate-100/90 border-t border-slate-200 overflow-x-auto scrollbar-none flex items-center space-x-1.5 flex-shrink-0">
+          <span className="text-[10px] font-extrabold text-slate-500 uppercase flex-shrink-0 mr-1 flex items-center space-x-1">
+            <Sparkles className="w-3 h-3 text-amber-500" />
+            <span>Fast:</span>
+          </span>
+          {quickPills.map((pill) => (
+            <button
+              key={pill.label}
+              type="button"
+              onClick={() => handleSendMessage(pill.query)}
+              className="px-2.5 py-1 rounded-full bg-white hover:bg-amber-50 text-slate-700 hover:text-gov-950 text-xs font-semibold border border-slate-200 hover:border-amber-400 transition whitespace-nowrap shadow-xs flex-shrink-0"
+            >
+              {pill.label}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => handleSendMessage("Funds")}
+            className="px-2.5 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-900 text-xs font-bold border border-emerald-300 transition whitespace-nowrap shadow-xs flex-shrink-0"
+          >
+            💰 Funds
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSendMessage("Total Population")}
+            className="px-2.5 py-1 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-900 text-xs font-bold border border-indigo-300 transition whitespace-nowrap shadow-xs flex-shrink-0"
+          >
+            👥 Population
+          </button>
+        </div>
+
+        {/* Query Input Bar */}
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSendMessage();
+          }} 
+          className="p-3 sm:p-4 bg-white border-t border-slate-200 flex items-center space-x-2 flex-shrink-0"
+        >
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputQuery}
+            onChange={(e) => setInputQuery(e.target.value)}
+            placeholder={t.chatbotPlaceholder || "Type a village name (e.g. Shivapura, Ward 2, Funds)..."}
+            className="flex-1 px-4 py-2.5 rounded-2xl border border-slate-300 text-xs sm:text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-gov-500 focus:border-gov-500 transition shadow-inner"
+          />
+
+          <button
+            type="submit"
+            disabled={!inputQuery.trim() || isTyping}
+            className="px-4 py-2.5 bg-gov-900 hover:bg-gov-800 disabled:opacity-50 text-white rounded-2xl font-bold text-xs sm:text-sm shadow-md transition flex items-center space-x-1.5 flex-shrink-0"
+          >
+            <span>{t.chatbotSend || "Send"}</span>
+            <Send className="w-3.5 h-3.5 text-amber-400" />
+          </button>
+        </form>
+
+      </div>
+    </div>
+  );
+};
+
+export default VillageChatbotModal;
