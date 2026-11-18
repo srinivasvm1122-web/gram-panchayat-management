@@ -24,11 +24,24 @@ export const LOCALE_PREFIX_MAP = {
 };
 
 /**
+ * Get SpeechRecognition constructor across different browser vendors
+ */
+export const getSpeechRecognitionClass = () => {
+  if (typeof window === "undefined") return null;
+  return (
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition ||
+    window.mozSpeechRecognition ||
+    window.msSpeechRecognition ||
+    null
+  );
+};
+
+/**
  * Check if Speech Recognition is supported in the current environment
  */
 export const isSpeechRecognitionSupported = () => {
-  if (typeof window === "undefined") return false;
-  return Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
+  return Boolean(getSpeechRecognitionClass());
 };
 
 /**
@@ -40,14 +53,17 @@ export const isSpeechSynthesisSupported = () => {
 };
 
 /**
- * Request audio microphone permission explicitly (crucial for Android WebView)
+ * Request audio microphone permission explicitly via MediaDevices
+ * Used when permission is denied or in Android WebViews requiring explicit userMedia prompt
  */
 export const requestMicrophonePermission = async () => {
   if (typeof navigator !== "undefined" && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Stop tracks immediately after permission check
-      stream.getTracks().forEach(track => track.stop());
+      // Keep tracks for a moment then stop to ensure Android WebView records permission
+      setTimeout(() => {
+        stream.getTracks().forEach((track) => track.stop());
+      }, 300);
       return { granted: true };
     } catch (err) {
       console.warn("Microphone permission check failed:", err.name, err.message);
@@ -59,16 +75,18 @@ export const requestMicrophonePermission = async () => {
       };
     }
   }
-  return { granted: true }; // Fallback to let SpeechRecognition prompt directly
+  return { granted: true };
 };
 
 // Active recognition instance tracker
 let activeRecognition = null;
+let speechSilenceTimer = null;
 
 /**
- * Start listening for speech input in the target language
+ * Start listening for speech input in the target language synchronously
+ * Crucial: Must be initiated synchronously inside the user click event tick to retain user gesture token.
  */
-export const startListening = async ({
+export const startListening = ({
   lang = "en",
   onStart = () => {},
   onInterim = () => {},
@@ -76,86 +94,131 @@ export const startListening = async ({
   onError = () => {},
   onEnd = () => {}
 }) => {
-  if (!isSpeechRecognitionSupported()) {
-    onError("not_supported", "Speech recognition is not supported in this browser.");
+  const SpeechRecognition = getSpeechRecognitionClass();
+
+  if (!SpeechRecognition) {
+    onError("not_supported", "Speech recognition is not supported in this browser. Please use Chrome or Android WebView.");
     return null;
   }
 
-  // Pre-check Android WebView audio permissions
-  const permCheck = await requestMicrophonePermission();
-  if (!permCheck.granted && permCheck.error === "permission_denied") {
-    onError("permission_denied", "Microphone access was denied. Please allow microphone in settings.");
-    return null;
-  }
-
-  // Cancel any ongoing instance
+  // Cancel any ongoing instance immediately
   stopListening();
 
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const recognition = new SpeechRecognition();
-
-  const bcp47Locale = LOCALE_BCP47_MAP[lang] || "en-IN";
-  recognition.lang = bcp47Locale;
-  recognition.continuous = false;
-  recognition.interimResults = true;
-  recognition.maxAlternatives = 1;
-
-  let finalTranscript = "";
-
-  recognition.onstart = () => {
-    onStart();
-  };
-
-  recognition.onresult = (event) => {
-    let interimText = "";
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const transcript = event.results[i][0].transcript;
-      if (event.results[i].isFinal) {
-        finalTranscript += transcript;
-      } else {
-        interimText += transcript;
-      }
-    }
-
-    if (interimText) {
-      onInterim(interimText);
-    }
-
-    if (finalTranscript) {
-      onResult(finalTranscript.trim());
-    }
-  };
-
-  recognition.onerror = (event) => {
-    console.warn("Speech recognition error:", event.error);
-    onError(event.error, event.message || event.error);
-  };
-
-  recognition.onend = () => {
-    activeRecognition = null;
-    onEnd();
-  };
-
   try {
+    const recognition = new SpeechRecognition();
+    const bcp47Locale = LOCALE_BCP47_MAP[lang] || "en-IN";
+
+    recognition.lang = bcp47Locale;
+    // Use continuous mode so recognition does NOT prematurely shut off if there is 1 second of initial silence
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+
+    let finalTranscript = "";
+    let accumulatedText = "";
+    let hasSentResult = false;
+
+    // Clear any leftover silence timers
+    if (speechSilenceTimer) {
+      clearTimeout(speechSilenceTimer);
+      speechSilenceTimer = null;
+    }
+
+    recognition.onstart = () => {
+      onStart();
+    };
+
+    recognition.onresult = (event) => {
+      let interimText = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          accumulatedText += " " + transcript;
+        } else {
+          interimText += transcript;
+        }
+      }
+
+      accumulatedText = accumulatedText.trim();
+      const currentFullText = (accumulatedText + " " + interimText).trim();
+
+      if (interimText || accumulatedText) {
+        onInterim(currentFullText);
+      }
+
+      // If user spoke something meaningful, set a smart silence auto-submit timer (1.8 seconds of pause)
+      if (currentFullText.length > 2) {
+        if (speechSilenceTimer) clearTimeout(speechSilenceTimer);
+        speechSilenceTimer = setTimeout(() => {
+          if (!hasSentResult && currentFullText.trim()) {
+            hasSentResult = true;
+            onResult(currentFullText.trim());
+            stopListening();
+          }
+        }, 1800);
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.warn("Speech recognition error:", event.error);
+
+      // In continuous mode, "no-speech" is normal when user is pausing. Do NOT crash or stop.
+      if (event.error === "no-speech") {
+        return;
+      }
+
+      // If language tag isn't supported on local engine, fallback to en-IN
+      if (event.error === "language-not-supported") {
+        try {
+          recognition.lang = "en-IN";
+          return;
+        } catch {}
+      }
+
+      onError(event.error, event.message || event.error);
+    };
+
+    recognition.onend = () => {
+      activeRecognition = null;
+      if (speechSilenceTimer) {
+        clearTimeout(speechSilenceTimer);
+        speechSilenceTimer = null;
+      }
+      onEnd();
+    };
+
+    // Synchronously start recognition
     recognition.start();
     activeRecognition = recognition;
     return recognition;
   } catch (err) {
     console.error("Failed to start speech recognition:", err);
-    onError("start_failed", err.message);
+    // If it was already started, ignore or restart cleanly
+    if (err.name === "InvalidStateError") {
+      stopListening();
+    }
+    onError("start_failed", err.message || "Failed to start microphone.");
     return null;
   }
 };
 
 /**
- * Stop active speech recognition instance
+ * Stop active speech recognition instance immediately
  */
 export const stopListening = () => {
+  if (speechSilenceTimer) {
+    clearTimeout(speechSilenceTimer);
+    speechSilenceTimer = null;
+  }
+
   if (activeRecognition) {
     try {
-      activeRecognition.stop();
+      // Abort immediately closes the microphone audio hardware
+      activeRecognition.abort();
     } catch {
-      // Ignore if already stopped
+      try {
+        activeRecognition.stop();
+      } catch {}
     }
     activeRecognition = null;
   }

@@ -31,6 +31,7 @@ import { processChatbotQuery } from "../services/chatbotService";
 import {
   isSpeechRecognitionSupported,
   isSpeechSynthesisSupported,
+  requestMicrophonePermission,
   startListening,
   stopListening,
   speakText,
@@ -49,6 +50,7 @@ const LANGUAGE_DISPLAY_NAMES = {
 
 export const VillageChatbotModal = ({
   isOpen = false,
+  autoStartVoice = false,
   onClose,
   villages = [],
   funds = {},
@@ -108,6 +110,16 @@ export const VillageChatbotModal = ({
     };
   }, []);
 
+  // Auto-start voice if requested from launcher
+  useEffect(() => {
+    if (isOpen && autoStartVoice) {
+      const timer = setTimeout(() => {
+        toggleVoiceListening();
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, autoStartVoice]);
+
   const handleModalClose = () => {
     stopListening();
     stopSpeaking();
@@ -148,6 +160,21 @@ export const VillageChatbotModal = ({
     }
   };
 
+  const handleRequestMicPermission = async () => {
+    setVoiceErrorMessage("");
+    const res = await requestMicrophonePermission();
+    if (res.granted) {
+      setTimeout(() => {
+        toggleVoiceListening();
+      }, 100);
+    } else {
+      setVoiceErrorMessage(
+        t.micPermissionDenied ||
+        "Microphone access was denied. Please allow microphone in your browser address bar or device settings."
+      );
+    }
+  };
+
   const toggleVoiceListening = () => {
     // If audio is playing, stop it first
     if (isAudioPlaying) {
@@ -158,12 +185,18 @@ export const VillageChatbotModal = ({
       stopListening();
       setIsListening(false);
       setVoiceStatus("idle");
-      setInterimSpeech("");
+      // If user had spoken something, send it
+      if (inputQuery.trim()) {
+        handleSendMessage(inputQuery.trim(), { autoSpeak: true });
+      }
       return;
     }
 
     if (!isSpeechRecognitionSupported()) {
-      setVoiceErrorMessage(t.micNotSupported || "Speech recognition is not supported on this device/browser.");
+      setVoiceErrorMessage(
+        t.micNotSupported || 
+        "Speech recognition is not supported on this browser. Please use Google Chrome or Android WebView."
+      );
       return;
     }
 
@@ -172,20 +205,23 @@ export const VillageChatbotModal = ({
     setVoiceStatus("listening");
     setIsListening(true);
 
-    startListening({
+    const recognition = startListening({
       lang,
       onStart: () => {
         setIsListening(true);
         setVoiceStatus("listening");
+        setVoiceErrorMessage("");
       },
       onInterim: (text) => {
         setInterimSpeech(text);
+        setInputQuery(text);
       },
       onResult: (finalTranscript) => {
         setIsListening(false);
         setInterimSpeech("");
         setVoiceStatus("processing");
         if (finalTranscript && finalTranscript.trim()) {
+          setInputQuery(finalTranscript.trim());
           handleSendMessage(finalTranscript.trim(), { autoSpeak: true });
         } else {
           setVoiceStatus("idle");
@@ -196,7 +232,10 @@ export const VillageChatbotModal = ({
         setVoiceStatus("error");
         setInterimSpeech("");
         if (errCode === "not-allowed" || errCode === "permission_denied") {
-          setVoiceErrorMessage(t.micPermissionDenied || "Microphone access was denied. Please allow microphone permissions in settings.");
+          setVoiceErrorMessage(
+            t.micPermissionDenied || 
+            "Microphone permission blocked. Click 'Allow Mic' or enable it in browser settings."
+          );
         } else if (errCode === "no-speech") {
           setVoiceErrorMessage(t.micErrorNoSpeech || "No speech detected. Please tap mic and speak again.");
         } else if (errCode === "not_supported") {
@@ -210,6 +249,11 @@ export const VillageChatbotModal = ({
         setVoiceStatus(prev => (prev === "listening" ? "idle" : prev));
       }
     });
+
+    if (!recognition) {
+      setIsListening(false);
+      setVoiceStatus("idle");
+    }
   };
 
   const handleSendMessage = (textToSend, options = {}) => {
@@ -701,30 +745,30 @@ export const VillageChatbotModal = ({
         {isListening && (
           <div className="px-4 py-2.5 bg-gradient-to-r from-red-500/10 via-amber-500/15 to-red-500/10 border-t border-amber-300 flex items-center justify-between animate-in fade-in duration-150 flex-shrink-0">
             <div className="flex items-center space-x-2.5 min-w-0">
-              <span className="relative flex h-3 w-3 flex-shrink-0">
+              <span className="relative flex h-3.5 w-3.5 flex-shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-600"></span>
               </span>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-slate-900 truncate">
+                <p className="text-xs font-black text-slate-900 truncate">
                   {interimSpeech ? (
-                    <span className="italic text-gov-900">"{interimSpeech}"</span>
+                    <span className="text-red-700 font-extrabold italic">"{interimSpeech}"</span>
                   ) : (
                     <span>{t.micListening || `Listening... Speak in ${LANGUAGE_DISPLAY_NAMES[lang] || 'your language'}`}</span>
                   )}
                 </p>
-                <p className="text-[10px] text-slate-500">
-                  {t.voiceAssistantActive || "Voice AI Active"} ({LANGUAGE_DISPLAY_NAMES[lang] || lang.toUpperCase()})
+                <p className="text-[10px] text-slate-500 font-semibold">
+                  🎙️ {t.voiceAssistantActive || "Voice Assistant Listening"} ({LANGUAGE_DISPLAY_NAMES[lang] || lang.toUpperCase()}) — Tap Red Mic to send
                 </p>
               </div>
             </div>
 
             {/* Audio waveform bouncing bars */}
             <div className="flex items-center space-x-1 flex-shrink-0 ml-2">
-              <span className="w-1 h-3.5 bg-red-500 rounded-full animate-bounce [animation-delay:0ms]"></span>
-              <span className="w-1 h-5 bg-amber-500 rounded-full animate-bounce [animation-delay:150ms]"></span>
-              <span className="w-1 h-4 bg-red-600 rounded-full animate-bounce [animation-delay:300ms]"></span>
-              <span className="w-1 h-2.5 bg-amber-600 rounded-full animate-bounce [animation-delay:450ms]"></span>
+              <span className="w-1.5 h-3.5 bg-red-600 rounded-full animate-bounce [animation-delay:0ms]"></span>
+              <span className="w-1.5 h-6 bg-amber-500 rounded-full animate-bounce [animation-delay:150ms]"></span>
+              <span className="w-1.5 h-4.5 bg-red-500 rounded-full animate-bounce [animation-delay:300ms]"></span>
+              <span className="w-1.5 h-3 bg-amber-600 rounded-full animate-bounce [animation-delay:450ms]"></span>
             </div>
           </div>
         )}
@@ -737,20 +781,30 @@ export const VillageChatbotModal = ({
           </div>
         )}
 
-        {/* Voice Error Notice */}
+        {/* Voice Error Notice with direct Allow Permission action */}
         {voiceErrorMessage && (
-          <div className="px-4 py-2 bg-red-50 border-t border-red-200 text-xs text-red-800 flex items-center justify-between flex-shrink-0">
-            <div className="flex items-center space-x-1.5 truncate">
-              <AlertTriangle className="w-3.5 h-3.5 text-red-600 flex-shrink-0" />
+          <div className="px-4 py-2.5 bg-red-50 border-t border-red-200 text-xs text-red-900 flex items-center justify-between flex-shrink-0 animate-in fade-in duration-150">
+            <div className="flex items-center space-x-2 truncate min-w-0 mr-2">
+              <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
               <span className="truncate">{voiceErrorMessage}</span>
             </div>
-            <button
-              type="button"
-              onClick={() => setVoiceErrorMessage("")}
-              className="text-red-500 hover:text-red-700 ml-2 font-black text-sm"
-            >
-              ×
-            </button>
+            <div className="flex items-center space-x-2 flex-shrink-0">
+              <button
+                type="button"
+                onClick={handleRequestMicPermission}
+                className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-[11px] shadow-sm flex items-center space-x-1 transition active:scale-95"
+              >
+                <Mic className="w-3 h-3" />
+                <span>{lang === "kn" ? "ಮೈಕ್ ಅನುಮತಿಸಿ" : "Allow Mic"}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setVoiceErrorMessage("")}
+                className="text-red-500 hover:text-red-700 font-black text-sm p-1"
+              >
+                ×
+              </button>
+            </div>
           </div>
         )}
 
@@ -769,10 +823,14 @@ export const VillageChatbotModal = ({
             onChange={(e) => setInputQuery(e.target.value)}
             placeholder={
               isListening
-                ? (t.micListening || `Listening in ${LANGUAGE_DISPLAY_NAMES[lang]}...`)
+                ? (t.micListening || `Listening in ${LANGUAGE_DISPLAY_NAMES[lang]}... Speak now`)
                 : (t.chatbotPlaceholder || "Type or tap mic to speak (e.g. Shivapura, Funds)...")
             }
-            className="flex-1 px-4 py-2.5 rounded-2xl border border-slate-300 text-xs sm:text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-gov-500 focus:border-gov-500 transition shadow-inner"
+            className={`flex-1 px-4 py-2.5 rounded-2xl border text-xs sm:text-sm transition shadow-inner ${
+              isListening 
+                ? "bg-red-50/50 border-red-400 focus:ring-2 focus:ring-red-400 focus:border-red-400 text-gov-950 font-medium" 
+                : "bg-slate-50 focus:bg-white border-slate-300 focus:ring-2 focus:ring-gov-500 focus:border-gov-500"
+            }`}
           />
 
           {/* Voice Microphone Button */}
@@ -781,22 +839,22 @@ export const VillageChatbotModal = ({
             onClick={toggleVoiceListening}
             className={`p-2.5 rounded-2xl font-bold transition flex items-center justify-center flex-shrink-0 shadow-md ${
               isListening
-                ? "bg-red-600 text-white animate-pulse ring-4 ring-red-400/40"
+                ? "bg-red-600 hover:bg-red-700 text-white animate-pulse ring-4 ring-red-400/40"
                 : "bg-amber-500 hover:bg-amber-600 text-gov-950 active:scale-95"
             }`}
-            title={isListening ? (t.stopSpeaking || "Stop Listening") : (t.micListening || `Speak question in ${LANGUAGE_DISPLAY_NAMES[lang]}`)}
+            title={isListening ? (t.stopSpeaking || "Stop Listening / Send") : (t.micListening || `Speak in ${LANGUAGE_DISPLAY_NAMES[lang]}`)}
           >
             {isListening ? (
-              <MicOff className="w-4 h-4 text-white" />
+              <MicOff className="w-5 h-5 text-white" />
             ) : (
-              <Mic className="w-4 h-4 text-gov-950" />
+              <Mic className="w-5 h-5 text-gov-950" />
             )}
           </button>
 
           {/* Send Button */}
           <button
             type="submit"
-            disabled={!inputQuery.trim() || isTyping || isListening}
+            disabled={!inputQuery.trim() || isTyping}
             className="px-4 py-2.5 bg-gov-900 hover:bg-gov-800 disabled:opacity-50 text-white rounded-2xl font-bold text-xs sm:text-sm shadow-md transition flex items-center space-x-1.5 flex-shrink-0 active:scale-95"
           >
             <span>{t.chatbotSend || "Send"}</span>

@@ -369,14 +369,25 @@ export const Dashboard = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row items-center gap-2 flex-shrink-0 w-full sm:w-auto">
+          {/* Direct Speak with Voice AI Button */}
           <button
             type="button"
-            onClick={() => onOpenChatbot && onOpenChatbot()}
-            className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:brightness-105 active:scale-95 text-gov-950 font-black text-xs sm:text-sm rounded-xl shadow-lg transition flex items-center justify-center space-x-2"
+            onClick={() => onOpenChatbot && onOpenChatbot({ autoVoice: true })}
+            className="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-red-600 via-amber-500 to-amber-400 hover:brightness-110 active:scale-95 text-gov-950 font-black text-xs sm:text-sm rounded-xl shadow-lg transition flex items-center justify-center space-x-2"
           >
-            <Mic className="w-4 h-4 text-gov-950" />
-            <span>{t.chatbotAskAboutVillage || "Ask AI Chatbot"} &rarr;</span>
+            <Mic className="w-4 h-4 text-gov-950 animate-pulse" />
+            <span>{lang === "kn" ? "ಧ್ವನಿಯಲ್ಲಿ ಮಾತನಾಡಿ" : "Speak Query (Voice)"}</span>
+          </button>
+
+          {/* Open Chatbot Modal Button */}
+          <button
+            type="button"
+            onClick={() => onOpenChatbot && onOpenChatbot({ autoVoice: false })}
+            className="w-full sm:w-auto px-4 py-2.5 bg-gov-900/90 hover:bg-gov-800 text-white font-bold text-xs sm:text-sm rounded-xl border border-amber-400/30 transition flex items-center justify-center space-x-1.5"
+          >
+            <Bot className="w-4 h-4 text-amber-400" />
+            <span>{t.chatbotAskAboutVillage || "Ask Chatbot"} &rarr;</span>
           </button>
         </div>
       </div>
