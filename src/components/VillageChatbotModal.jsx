@@ -36,7 +36,8 @@ import {
   stopListening,
   speakText,
   stopSpeaking,
-  isSpeaking
+  isSpeaking,
+  isSecureOrigin
 } from "../services/voiceService";
 
 const LANGUAGE_DISPLAY_NAMES = {
@@ -75,6 +76,7 @@ export const VillageChatbotModal = ({
   const [voiceErrorMessage, setVoiceErrorMessage] = useState("");
   const [currentlySpeakingId, setCurrentlySpeakingId] = useState(null);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [showMicHelpModal, setShowMicHelpModal] = useState(false);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -164,14 +166,24 @@ export const VillageChatbotModal = ({
     setVoiceErrorMessage("");
     const res = await requestMicrophonePermission();
     if (res.granted) {
+      setShowMicHelpModal(false);
       setTimeout(() => {
         toggleVoiceListening();
       }, 100);
     } else {
-      setVoiceErrorMessage(
-        t.micPermissionDenied ||
-        "Microphone access was denied. Please allow microphone in your browser address bar or device settings."
-      );
+      setShowMicHelpModal(true);
+      if (res.error === "insecure_origin") {
+        setVoiceErrorMessage(
+          lang === "kn"
+            ? "HTTP ನೆಟ್‌ವರ್ಕ್‌ನಲ್ಲಿ ಮೈಕ್ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ. 'ಸಹಾಯ' ಒತ್ತಿ."
+            : "Microphone blocked on HTTP IP address. Tap 'How to Fix'."
+        );
+      } else {
+        setVoiceErrorMessage(
+          t.micPermissionDenied ||
+          "Microphone access was denied. Please allow microphone in your browser address bar or device settings."
+        );
+      }
     }
   };
 
@@ -234,7 +246,13 @@ export const VillageChatbotModal = ({
         if (errCode === "not-allowed" || errCode === "permission_denied") {
           setVoiceErrorMessage(
             t.micPermissionDenied || 
-            "Microphone permission blocked. Click 'Allow Mic' or enable it in browser settings."
+            "Microphone permission blocked. Tap 'How to Fix' or allow in browser settings."
+          );
+        } else if (errCode === "insecure_origin") {
+          setVoiceErrorMessage(
+            lang === "kn"
+              ? "HTTP ನೆಟ್‌ವರ್ಕ್‌ನಲ್ಲಿ ಮೈಕ್ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ. 'ಸಹಾಯ' ಒತ್ತಿ."
+              : "Microphone blocked on HTTP IP address. Tap 'How to Fix'."
           );
         } else if (errCode === "no-speech") {
           setVoiceErrorMessage(t.micErrorNoSpeech || "No speech detected. Please tap mic and speak again.");
@@ -781,14 +799,24 @@ export const VillageChatbotModal = ({
           </div>
         )}
 
-        {/* Voice Error Notice with direct Allow Permission action */}
+        {/* Voice Error Notice with direct Allow Permission and Help action */}
         {voiceErrorMessage && (
-          <div className="px-4 py-2.5 bg-red-50 border-t border-red-200 text-xs text-red-900 flex items-center justify-between flex-shrink-0 animate-in fade-in duration-150">
-            <div className="flex items-center space-x-2 truncate min-w-0 mr-2">
+          <div className="px-3.5 py-2.5 bg-red-50 border-t border-red-200 text-xs text-red-900 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 flex-shrink-0 animate-in fade-in duration-150">
+            <div className="flex items-center space-x-2 min-w-0 flex-1">
               <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
-              <span className="truncate">{voiceErrorMessage}</span>
+              <span className="text-[11px] leading-tight font-medium text-red-950">
+                {voiceErrorMessage}
+              </span>
             </div>
-            <div className="flex items-center space-x-2 flex-shrink-0">
+            <div className="flex items-center space-x-1.5 flex-shrink-0 ml-auto">
+              <button
+                type="button"
+                onClick={() => setShowMicHelpModal(true)}
+                className="px-2 py-1 bg-white hover:bg-slate-100 border border-red-300 text-red-800 rounded-lg font-bold text-[10px] shadow-xs flex items-center space-x-1 transition active:scale-95"
+              >
+                <HelpCircle className="w-3 h-3 text-red-600" />
+                <span>{lang === "kn" ? "ಸಹಾಯ (ಹೇಗೆ?)" : "How to Fix"}</span>
+              </button>
               <button
                 type="button"
                 onClick={handleRequestMicPermission}
@@ -800,7 +828,8 @@ export const VillageChatbotModal = ({
               <button
                 type="button"
                 onClick={() => setVoiceErrorMessage("")}
-                className="text-red-500 hover:text-red-700 font-black text-sm p-1"
+                className="text-red-500 hover:text-red-700 font-black text-sm p-1 ml-0.5"
+                title="Dismiss"
               >
                 ×
               </button>
@@ -861,6 +890,120 @@ export const VillageChatbotModal = ({
             <Send className="w-3.5 h-3.5 text-amber-400" />
           </button>
         </form>
+
+        {/* Microphone Permission Guide Popover / Modal */}
+        {showMicHelpModal && (
+          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150">
+            <div className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-200 text-slate-800 space-y-4 animate-in zoom-in-95 duration-150">
+              
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-red-100 text-red-700 flex items-center justify-center">
+                    <Mic className="w-5 h-5 text-red-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-sm text-slate-900">
+                      {lang === "kn" ? "ಮೈಕ್ರೊಫೋನ್ ಅನುಮತಿಸುವ ವಿಧಾನ" : "Enable Microphone Access"}
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      {lang === "kn" ? "ಧ್ವನಿ ಸಹಾಯಕ ಬಳಸಲು ಮೈಕ್ ಆನ್ ಮಾಡಿ" : "Allow microphone to speak with Voice AI"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowMicHelpModal(false)}
+                  className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 font-bold"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Special Alert for Insecure Context (HTTP IP on Wi-Fi) */}
+              {typeof window !== "undefined" && !isSecureOrigin() && (
+                <div className="bg-amber-50 border border-amber-300 rounded-2xl p-3 text-xs text-amber-950 space-y-2">
+                  <div className="flex items-center space-x-1.5 font-extrabold text-amber-900">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    <span>{lang === "kn" ? "ಸ್ಥಳೀಯ HTTP ವಿಳಾಸ ಕಂಡುಬಂದಿದೆ" : "Notice: Insecure Wi-Fi IP Address"}</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-amber-900/90">
+                    {lang === "kn"
+                      ? `ನೀವು "${window.location.host}" (HTTP) ಮೂಲಕ ತೆರೆದಿದ್ದೀರಿ. ಆಂಡ್ರಾಯ್ಡ್ Chrome ಭದ್ರತೆಯ ಕಾರಣದಿಂದ HTTP ವಿಳಾಸಗಳಲ್ಲಿ ಮೈಕ್ ತಡೆಹಿಡಿಯುತ್ತದೆ.`
+                      : `You are opening "${window.location.host}" over HTTP Wi-Fi. Android Chrome restricts microphone on HTTP IP addresses.`
+                    }
+                  </p>
+                  <div className="bg-white/80 p-2.5 rounded-xl border border-amber-200 text-[11px] space-y-1">
+                    <p className="font-bold text-slate-900">
+                      {lang === "kn" ? "📱 ಮೊಬೈಲ್ Chrome ನಲ್ಲಿ ಸರಿಪಡಿಸಲು (1 ನಿಮಿಷ):" : "📱 1-Minute Fix in Mobile Chrome:"}
+                    </p>
+                    <ol className="list-decimal list-inside space-y-0.5 text-slate-700">
+                      <li>Open a new tab in Chrome on your phone</li>
+                      <li>Go to: <code className="bg-amber-100 px-1 rounded text-amber-900 font-mono text-[10px]">chrome://flags/#unsafely-treat-insecure-origin-as-secure</code></li>
+                      <li>Enable it and type: <code className="bg-amber-100 px-1 rounded text-amber-900 font-mono text-[10px]">http://{window.location.host}</code></li>
+                      <li>Tap <strong>Relaunch</strong> button!</li>
+                    </ol>
+                  </div>
+                </div>
+              )}
+
+              {/* Standard Step-by-Step Instructions */}
+              <div className="space-y-2.5 text-xs text-slate-700">
+                <div className="flex items-start space-x-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                  <div className="w-6 h-6 rounded-full bg-gov-900 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">
+                    1
+                  </div>
+                  <div>
+                    <strong className="block text-slate-900 font-bold mb-0.5">
+                      {lang === "kn" ? "ವಿಧಾನ 1: Chrome ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಅನ್‌ಬ್ಲಾಕ್ ಮಾಡಿ" : "Method 1: Unblock in Chrome Browser"}
+                    </strong>
+                    <p className="text-[11px] text-slate-600 leading-normal">
+                      {lang === "kn"
+                        ? "ಮೇಲಿನ ಅಡ್ರೆಸ್ ಬಾರ್‌ನಲ್ಲಿರುವ 🔒 ಲಾಕ್ ಅಥವಾ ⚙️ ಟ್ಯೂನ್ ಐಕಾನ್ ಒತ್ತಿ → Permissions → Microphone → 'Allow' ಆಯ್ಕೆಮಾಡಿ."
+                        : "Tap the 🔒 Lock or ⚙️ Tune icon next to the URL at the top → Permissions → Microphone → select 'Allow'."}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                  <div className="w-6 h-6 rounded-full bg-gov-900 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">
+                    2
+                  </div>
+                  <div>
+                    <strong className="block text-slate-900 font-bold mb-0.5">
+                      {lang === "kn" ? "ವಿಧಾನ 2: ಮೊಬೈಲ್ ಸೆಟ್ಟಿಂಗ್ಸ್‌ನಲ್ಲಿ ಅನ್‌ಬ್ಲಾಕ್ ಮಾಡಿ" : "Method 2: Phone Android Settings"}
+                    </strong>
+                    <p className="text-[11px] text-slate-600 leading-normal">
+                      {lang === "kn"
+                        ? "ಫೋನ್ Settings → Apps → Chrome (ಅಥವಾ GramPanchayat) → Permissions → Microphone → 'Allow only while using app' ಆಯ್ಕೆಮಾಡಿ."
+                        : "Go to Phone Settings → Apps → Chrome (or this App) → Permissions → Microphone → select 'Allow only while using the app'."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center space-x-2 pt-2">
+                <button
+                  type="button"
+                  onClick={handleRequestMicPermission}
+                  className="flex-1 py-2.5 bg-gov-900 hover:bg-gov-800 text-white font-extrabold rounded-2xl text-xs shadow-md flex items-center justify-center space-x-2 transition active:scale-95"
+                >
+                  <Mic className="w-4 h-4 text-amber-400" />
+                  <span>{lang === "kn" ? "ಮೈಕ್ ಪರೀಕ್ಷಿಸಿ & ಆನ್ ಮಾಡಿ" : "Test & Allow Microphone"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowMicHelpModal(false)}
+                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs transition"
+                >
+                  {lang === "kn" ? "ಮುಚ್ಚಿ" : "Close"}
+                </button>
+              </div>
+
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

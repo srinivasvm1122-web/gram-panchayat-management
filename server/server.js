@@ -84,6 +84,11 @@ const hasPlaceholderPassword = MONGODB_URI.includes("<db_password>");
 
 // MongoDB Atlas Connection
 const connectDB = async () => {
+  if (mongoose.connection.readyState >= 1) {
+    isDbConnected = true;
+    return;
+  }
+
   if (hasPlaceholderPassword) {
     console.warn("\n========================================================");
     console.warn("⚠️  MONGODB CONFIGURATION NOTICE:");
@@ -585,7 +590,11 @@ app.post("/api/auth/forgot-password", async (req, res) => {
 // Connect to MongoDB and start server
 connectDB();
 
-app.listen(PORT, () => {
-  console.log(`🚀 Gram Panchayat MongoDB API server running at http://localhost:${PORT}`);
-  console.log(`📡 Health & Status endpoint: http://localhost:${PORT}/api/status`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Gram Panchayat MongoDB API server running at http://localhost:${PORT}`);
+    console.log(`📡 Health & Status endpoint: http://localhost:${PORT}/api/status`);
+  });
+}
+
+export default app;

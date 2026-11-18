@@ -53,10 +53,32 @@ export const isSpeechSynthesisSupported = () => {
 };
 
 /**
+ * Check if the current window origin is a secure context (https or localhost)
+ * Crucial for mobile browsers where Chrome blocks getUserMedia & SpeechRecognition on http://<IP>:PORT
+ */
+export const isSecureOrigin = () => {
+  if (typeof window === "undefined") return true;
+  return Boolean(
+    window.isSecureContext ||
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1" ||
+    window.location.protocol === "https:"
+  );
+};
+
+/**
  * Request audio microphone permission explicitly via MediaDevices
  * Used when permission is denied or in Android WebViews requiring explicit userMedia prompt
  */
 export const requestMicrophonePermission = async () => {
+  if (typeof window !== "undefined" && !isSecureOrigin()) {
+    return { 
+      granted: false, 
+      error: "insecure_origin",
+      message: "Microphone is restricted on insecure HTTP addresses. Use HTTPS or Chrome flags."
+    };
+  }
+
   if (typeof navigator !== "undefined" && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -71,7 +93,8 @@ export const requestMicrophonePermission = async () => {
         granted: false, 
         error: err.name === "NotAllowedError" || err.name === "PermissionDeniedError" 
           ? "permission_denied" 
-          : "mic_unavailable" 
+          : "mic_unavailable",
+        message: err.message 
       };
     }
   }
@@ -95,6 +118,11 @@ export const startListening = ({
   onEnd = () => {}
 }) => {
   const SpeechRecognition = getSpeechRecognitionClass();
+
+  if (!isSecureOrigin()) {
+    onError("insecure_origin", "Microphone is restricted by Chrome on insecure HTTP network addresses. Use HTTPS or enable Chrome flags.");
+    return null;
+  }
 
   if (!SpeechRecognition) {
     onError("not_supported", "Speech recognition is not supported in this browser. Please use Chrome or Android WebView.");
